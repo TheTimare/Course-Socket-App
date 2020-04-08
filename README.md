@@ -9,7 +9,7 @@ Course work. Client-Server chat working on .net sockets.
 Written on C++/CLI.
 
 ### Start instruction:
-1. Download the project and run it
+1. Download a projects and run any of them
 2. Right-click on the project, select Linker -> System -> Subsystem and set it to "Windows(/SUBSYSTEM:WINDOWS)"
 3. Switch to Linker -> Advanced -> Entry Point and set it to "Main"
 4. Now the project can be compiled
