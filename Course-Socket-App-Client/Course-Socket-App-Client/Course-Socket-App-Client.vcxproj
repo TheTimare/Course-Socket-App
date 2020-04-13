@@ -134,15 +134,23 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClientWindow.cpp" />
+    <ClCompile Include="Start.cpp" />
+    <ClCompile Include="ConnectWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClientWindow.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="ConnectWindow.h">
       <FileType>CppForm</FileType>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ClientWindow.resx">
       <DependentUpon>ClientWindow.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConnectWindow.resx">
+      <DependentUpon>ConnectWindow.h</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

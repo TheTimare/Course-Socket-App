@@ -8,6 +8,8 @@ namespace CourseSocketAppClient {
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
+	using namespace System::Net;
+	using namespace System::Net::Sockets;
 
 	/// <summary>
 	/// Сводка для ClientWindow
@@ -18,9 +20,6 @@ namespace CourseSocketAppClient {
 		ClientWindow(void)
 		{
 			InitializeComponent();
-			//
-			//TODO: добавьте код конструктора
-			//
 		}
 
 	protected:
@@ -38,13 +37,12 @@ namespace CourseSocketAppClient {
 	protected:
 	private: System::Windows::Forms::TextBox^  textBoxMessage;
 	private: System::Windows::Forms::Button^  buttonSendMsg;
-	private: System::Windows::Forms::Label^  label1;
-	private: System::Windows::Forms::TextBox^  textBoxName;
-	private: System::Windows::Forms::TextBox^  textBoxIP;
-	private: System::Windows::Forms::Label^  label2;
-	private: System::Windows::Forms::TextBox^  textBoxPort;
-	private: System::Windows::Forms::Label^  label3;
-	private: System::Windows::Forms::Button^  buttonConnect;
+
+	private: System::Windows::Forms::ToolStrip^  toolStrip1;
+	private: System::Windows::Forms::ToolStripDropDownButton^  toolStripDropDownButton1;
+	private: System::Windows::Forms::ToolStripMenuItem^  itemConnect;
+
+	private: System::Windows::Forms::ToolStripMenuItem^  itemDisconnect;
 
 	private:
 		/// <summary>
@@ -59,121 +57,92 @@ namespace CourseSocketAppClient {
 		/// </summary>
 		void InitializeComponent(void)
 		{
+			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(ClientWindow::typeid));
 			this->textBoxChat = (gcnew System::Windows::Forms::TextBox());
 			this->textBoxMessage = (gcnew System::Windows::Forms::TextBox());
 			this->buttonSendMsg = (gcnew System::Windows::Forms::Button());
-			this->label1 = (gcnew System::Windows::Forms::Label());
-			this->textBoxName = (gcnew System::Windows::Forms::TextBox());
-			this->textBoxIP = (gcnew System::Windows::Forms::TextBox());
-			this->label2 = (gcnew System::Windows::Forms::Label());
-			this->textBoxPort = (gcnew System::Windows::Forms::TextBox());
-			this->label3 = (gcnew System::Windows::Forms::Label());
-			this->buttonConnect = (gcnew System::Windows::Forms::Button());
+			this->toolStrip1 = (gcnew System::Windows::Forms::ToolStrip());
+			this->toolStripDropDownButton1 = (gcnew System::Windows::Forms::ToolStripDropDownButton());
+			this->itemConnect = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->itemDisconnect = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->toolStrip1->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// textBoxChat
 			// 
 			this->textBoxChat->BackColor = System::Drawing::SystemColors::Window;
 			this->textBoxChat->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
-			this->textBoxChat->Location = System::Drawing::Point(177, 12);
+			this->textBoxChat->Location = System::Drawing::Point(12, 40);
 			this->textBoxChat->Multiline = true;
 			this->textBoxChat->Name = L"textBoxChat";
 			this->textBoxChat->ReadOnly = true;
-			this->textBoxChat->Size = System::Drawing::Size(507, 355);
+			this->textBoxChat->Size = System::Drawing::Size(682, 355);
 			this->textBoxChat->TabIndex = 0;
 			// 
 			// textBoxMessage
 			// 
 			this->textBoxMessage->BackColor = System::Drawing::SystemColors::Window;
 			this->textBoxMessage->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
-			this->textBoxMessage->Location = System::Drawing::Point(177, 374);
+			this->textBoxMessage->Location = System::Drawing::Point(12, 401);
 			this->textBoxMessage->Multiline = true;
 			this->textBoxMessage->Name = L"textBoxMessage";
-			this->textBoxMessage->ReadOnly = true;
-			this->textBoxMessage->Size = System::Drawing::Size(409, 52);
+			this->textBoxMessage->Size = System::Drawing::Size(584, 45);
 			this->textBoxMessage->TabIndex = 1;
 			// 
 			// buttonSendMsg
 			// 
-			this->buttonSendMsg->Location = System::Drawing::Point(593, 374);
+			this->buttonSendMsg->Location = System::Drawing::Point(603, 401);
 			this->buttonSendMsg->Name = L"buttonSendMsg";
-			this->buttonSendMsg->Size = System::Drawing::Size(91, 52);
+			this->buttonSendMsg->Size = System::Drawing::Size(91, 45);
 			this->buttonSendMsg->TabIndex = 2;
 			this->buttonSendMsg->Text = L"Send Message";
 			this->buttonSendMsg->UseVisualStyleBackColor = true;
 			// 
-			// label1
+			// toolStrip1
 			// 
-			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(13, 12);
-			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(79, 17);
-			this->label1->TabIndex = 3;
-			this->label1->Text = L"Your Name";
+			this->toolStrip1->ImageScalingSize = System::Drawing::Size(20, 20);
+			this->toolStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->toolStripDropDownButton1 });
+			this->toolStrip1->Location = System::Drawing::Point(0, 0);
+			this->toolStrip1->Name = L"toolStrip1";
+			this->toolStrip1->Size = System::Drawing::Size(706, 27);
+			this->toolStrip1->TabIndex = 11;
+			this->toolStrip1->Text = L"toolStrip1";
 			// 
-			// textBoxName
+			// toolStripDropDownButton1
 			// 
-			this->textBoxName->Location = System::Drawing::Point(16, 32);
-			this->textBoxName->Name = L"textBoxName";
-			this->textBoxName->Size = System::Drawing::Size(143, 22);
-			this->textBoxName->TabIndex = 4;
+			this->toolStripDropDownButton1->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			this->toolStripDropDownButton1->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {
+				this->itemConnect,
+					this->itemDisconnect
+			});
+			this->toolStripDropDownButton1->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"toolStripDropDownButton1.Image")));
+			this->toolStripDropDownButton1->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->toolStripDropDownButton1->Name = L"toolStripDropDownButton1";
+			this->toolStripDropDownButton1->Size = System::Drawing::Size(64, 24);
+			this->toolStripDropDownButton1->Text = L"Server";
 			// 
-			// textBoxIP
+			// itemConnect
 			// 
-			this->textBoxIP->Location = System::Drawing::Point(16, 77);
-			this->textBoxIP->Name = L"textBoxIP";
-			this->textBoxIP->Size = System::Drawing::Size(143, 22);
-			this->textBoxIP->TabIndex = 6;
-			this->textBoxIP->Text = L"127.0.0.1";
+			this->itemConnect->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			this->itemConnect->Name = L"itemConnect";
+			this->itemConnect->Size = System::Drawing::Size(157, 26);
+			this->itemConnect->Text = L"Connect";
+			this->itemConnect->Click += gcnew System::EventHandler(this, &ClientWindow::itemConnect_Click);
 			// 
-			// label2
+			// itemDisconnect
 			// 
-			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(13, 57);
-			this->label2->Name = L"label2";
-			this->label2->Size = System::Drawing::Size(66, 17);
-			this->label2->TabIndex = 5;
-			this->label2->Text = L"Server IP";
-			// 
-			// textBoxPort
-			// 
-			this->textBoxPort->Location = System::Drawing::Point(16, 122);
-			this->textBoxPort->Name = L"textBoxPort";
-			this->textBoxPort->Size = System::Drawing::Size(63, 22);
-			this->textBoxPort->TabIndex = 8;
-			this->textBoxPort->Text = L"8080";
-			// 
-			// label3
-			// 
-			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(13, 102);
-			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(80, 17);
-			this->label3->TabIndex = 7;
-			this->label3->Text = L"Server Port";
-			// 
-			// buttonConnect
-			// 
-			this->buttonConnect->Location = System::Drawing::Point(16, 150);
-			this->buttonConnect->Name = L"buttonConnect";
-			this->buttonConnect->Size = System::Drawing::Size(143, 28);
-			this->buttonConnect->TabIndex = 9;
-			this->buttonConnect->Text = L"button1";
-			this->buttonConnect->UseVisualStyleBackColor = true;
+			this->itemDisconnect->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Text;
+			this->itemDisconnect->Name = L"itemDisconnect";
+			this->itemDisconnect->Size = System::Drawing::Size(157, 26);
+			this->itemDisconnect->Text = L"Disconnect";
 			// 
 			// ClientWindow
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::SystemColors::Menu;
-			this->ClientSize = System::Drawing::Size(696, 438);
-			this->Controls->Add(this->buttonConnect);
-			this->Controls->Add(this->textBoxPort);
-			this->Controls->Add(this->label3);
-			this->Controls->Add(this->textBoxIP);
-			this->Controls->Add(this->label2);
-			this->Controls->Add(this->textBoxName);
-			this->Controls->Add(this->label1);
+			this->ClientSize = System::Drawing::Size(706, 458);
+			this->Controls->Add(this->toolStrip1);
 			this->Controls->Add(this->buttonSendMsg);
 			this->Controls->Add(this->textBoxMessage);
 			this->Controls->Add(this->textBoxChat);
@@ -181,10 +150,41 @@ namespace CourseSocketAppClient {
 			this->MaximizeBox = false;
 			this->Name = L"ClientWindow";
 			this->Text = L"Client Chat";
+			this->toolStrip1->ResumeLayout(false);
+			this->toolStrip1->PerformLayout();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
 		}
 #pragma endregion
-	};
+
+	private:
+		int port;
+		IPAddress^ ip;
+		String^ name;
+
+	public:
+		int getPort() {
+			return port;
+		}
+		IPAddress^ getIP() {
+			return ip;
+		}
+		String^ getName() {
+			return name;
+		}
+	public:
+		void setPort(int port) {
+			this->port = port;
+		}
+		void setIP(IPAddress^ ip) {
+			this->ip = ip;
+		}
+		void setName(String^ name) {
+			this->name = name;
+		}
+		
+	private: System::Void itemConnect_Click(System::Object^  sender, System::EventArgs^  e);
+};
+
 }

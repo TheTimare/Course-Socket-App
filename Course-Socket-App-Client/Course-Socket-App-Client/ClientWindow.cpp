@@ -1,11 +1,11 @@
 #include "ClientWindow.h"
+#include "ConnectWindow.h"
 
-using namespace System;
-using namespace System::Windows::Forms;
+using namespace CourseSocketAppClient;
 
-[STAThreadAttribute]
-void Main(array<String^>^ args) {
-	Application::EnableVisualStyles();
-	Application::SetCompatibleTextRenderingDefault(false);
-	Application::Run(gcnew CourseSocketAppClient::ClientWindow());
+System::Void ClientWindow::itemConnect_Click(System::Object^  sender, System::EventArgs^  e) {
+	ConnectWindow^ connect = gcnew ConnectWindow(this);
+	connect->ShowDialog();
+	MessageBox::Show(name + " " + ip->ToString() + " " + Convert::ToString(port), "ошибка",
+		MessageBoxButtons::OK, MessageBoxIcon::Information);
 }
