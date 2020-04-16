@@ -1,10 +1,12 @@
 #pragma once
+#include <cliext/utility>  
 
 namespace CourseSocketApp {
 
 	using namespace System;
 	using namespace System::ComponentModel;
 	using namespace System::Collections;
+	using namespace System::Collections::Generic;
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
@@ -20,22 +22,7 @@ namespace CourseSocketApp {
 	public ref class ServerWindow : public System::Windows::Forms::Form
 	{
 	public:
-		ServerWindow(void)
-		{
-			InitializeComponent();
-			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
-			isStarted = false;
-			//get pc address
-			IPHostEntry^ host = Dns::GetHostEntry(Dns::GetHostName());
-			for(int i = 0; i < host->AddressList->Length; i++){
-				if (host->AddressList[i]->AddressFamily == AddressFamily::InterNetwork)
-				{
-					ip = host->AddressList[i]->ToString();
-					labelIP->Text += ip;
-					break;
-				}
-			}
-		}
+		ServerWindow(void);
 
 	protected:
 		~ServerWindow()
@@ -54,6 +41,8 @@ namespace CourseSocketApp {
 	private: System::Windows::Forms::TextBox^  textBoxPort;
 
 	private: System::Windows::Forms::Label^  labelIP;
+	private: System::Windows::Forms::TextBox^  textBoxIP;
+
 
 	protected:
 
@@ -75,6 +64,7 @@ namespace CourseSocketApp {
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->textBoxPort = (gcnew System::Windows::Forms::TextBox());
 			this->labelIP = (gcnew System::Windows::Forms::Label());
+			this->textBoxIP = (gcnew System::Windows::Forms::TextBox());
 			this->SuspendLayout();
 			// 
 			// textBoxChat
@@ -128,12 +118,21 @@ namespace CourseSocketApp {
 			this->labelIP->TabIndex = 4;
 			this->labelIP->Text = L"Server IP: ";
 			// 
+			// textBoxIP
+			// 
+			this->textBoxIP->Location = System::Drawing::Point(81, 44);
+			this->textBoxIP->Name = L"textBoxIP";
+			this->textBoxIP->ReadOnly = true;
+			this->textBoxIP->Size = System::Drawing::Size(100, 22);
+			this->textBoxIP->TabIndex = 5;
+			// 
 			// ServerWindow
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->BackColor = System::Drawing::SystemColors::Menu;
+			this->BackColor = System::Drawing::SystemColors::HighlightText;
 			this->ClientSize = System::Drawing::Size(800, 432);
+			this->Controls->Add(this->textBoxIP);
 			this->Controls->Add(this->labelIP);
 			this->Controls->Add(this->textBoxPort);
 			this->Controls->Add(this->label1);
@@ -149,90 +148,25 @@ namespace CourseSocketApp {
 		}
 #pragma endregion
 		//main code
-	private: String^ ip;
+	private: IPAddress^ ip;
 			 bool isStarted;
+			 Task^ serverTask;
+			 Hashtable^ userDB;
+			 
+	private: Socket^ mainSocket;
+			 void button_on_off_server_Click(System::Object^  sender, System::EventArgs^  e);
+			 void serverStart();
+			 void startMessageGetting(Socket^ handler);
 
-	private: System::Void button_on_off_server_Click(System::Object^  sender, System::EventArgs^  e) {
-		if (isStarted) {
-			textBoxPort->ReadOnly = false;
-			button_on_off_server->Text = "Start Server";
-			isStarted = false;
-		}
-		else {
-			Task^ serverTask = gcnew Task(gcnew Action(this, &ServerWindow::serverStart));
-			serverTask->Start();
-			textBoxPort->ReadOnly = true;
-			button_on_off_server->Text = "Shutdown Server";
-			isStarted = true;
-		}
-	}
-
-	private: void serverStart() {
-		/*if (this->InvokeRequired){
-			MethodInvoker^ d = gcnew MethodInvoker(this, &ServerWindow::foo);
-			this->BeginInvoke(d);
-		}
-		else{
-			foo();
-		}*/
-
-		int port;
-		try {
-			int port = Convert::ToInt32(textBoxPort->Text);
-		} catch (...) {
-			MessageBox::Show("Неправильно введен порт", "Ошибка",
-				MessageBoxButtons::OK, MessageBoxIcon::Error);
-			return;
-		}
-		// получаем адреса для запуска сокета
-		
-		IPEndPoint^ ipPoint = gcnew IPEndPoint(IPAddress::Parse(ip), port);
-		Socket^ listenSocket = gcnew Socket(AddressFamily::InterNetwork, SocketType::Stream, ProtocolType::Tcp);
-		try {
-			// связываем сокет с локальной точкой, по которой будем принимать данные
-			listenSocket->Bind(ipPoint);
-			// начинаем прослушивание
-			listenSocket->Listen(10);
-
-			MessageDelegate^ msg = gcnew MessageDelegate(this, &ServerWindow::serverMessage);
-			this->BeginInvoke(msg, "SYSTEM", "Server is started. Waiting for users...");
-
-			while (true) {
-				Socket^ handler = listenSocket->Accept();
-				// получаем сообщение
-				StringBuilder^ builder = gcnew StringBuilder();
-				int bytes = 0; // количество полученных байтов
-				array<unsigned char>^ data = gcnew array<unsigned char>(256); // буфер для получаемых данных
-
-				do {
-					bytes = handler->Receive(data); //Receive(data);
-					builder->Append(Encoding::Unicode->GetString(data, 0, bytes));
-				} while (handler->Available > 0);
-
-				msg = gcnew MessageDelegate(this, &ServerWindow::serverMessage);
-				this->BeginInvoke(msg, "USER", builder->ToString());
-
-				// отправляем ответ
-				String^ message = "success";
-				data = Encoding::Unicode->GetBytes(message);
-				handler->Send(data);
-				// закрываем сокет
-				handler->Shutdown(SocketShutdown::Both);
-				handler->Close();
-			}
-		} catch (Exception^ ex){
-			MessageBox::Show(ex->Message, "Ошибка",
-				MessageBoxButtons::OK, MessageBoxIcon::Error);
-		}
-		
-		MessageDelegate^ msg = gcnew MessageDelegate(this, &ServerWindow::serverMessage);
-		this->BeginInvoke(msg, "SYSTEM", "Server shutted down!!!");
-	}
+	private: delegate void SocketDelegate(Socket^ mainSocket);
+			 void setSocket(Socket^ mainSocket);
 	
 	private: delegate void MessageDelegate(String^ user, String^ msg);
-	void serverMessage(String^ user, String^ msg) {
-		textBoxChat->AppendText("[" + __TIME__ + "] ");
-		textBoxChat->AppendText(user + ": " + msg + "\r\n");
-	}
+			 void serverMessage(String^ user, String^ msg);
+
+	private: static bool isSocketStillConnected(Socket^ socket);
+
+	private: void setChatWorking(bool isWorking);
+
 };
 }

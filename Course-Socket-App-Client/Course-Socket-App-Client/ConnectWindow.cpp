@@ -10,9 +10,10 @@ System::Void ConnectWindow::buttonConnect_Click(System::Object^  sender, System:
 			throw gcnew Exception();
 		mainWindow->setIP(IPAddress::Parse(textBoxIP->Text));
 		mainWindow->setName(textBoxName->Text);
+		mainWindow->setInputSuccess(true);
 	}
 	catch (...) {
-		MessageBox::Show("Введены неправильные данные. Попробуйте еще раз...", "ошибка",
+		MessageBox::Show("Incorrect input. Try again...", "Error",
 			MessageBoxButtons::OK, MessageBoxIcon::Error);
 		return;
 	}
