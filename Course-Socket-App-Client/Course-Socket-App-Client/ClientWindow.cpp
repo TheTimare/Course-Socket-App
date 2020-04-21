@@ -8,6 +8,8 @@ ClientWindow::ClientWindow() {
 	setChatWorking(false);
 }
 
+/*---*/
+
 void ClientWindow::itemConnect_Click(System::Object^  sender, System::EventArgs^  e) {
 	inputSuccess = false;
 	ConnectWindow^ connect = gcnew ConnectWindow(this);
@@ -27,9 +29,12 @@ void ClientWindow::clientConnect() {
 		messageSocket = gcnew Socket(AddressFamily::InterNetwork, SocketType::Stream, ProtocolType::Tcp);
 		// подключаемся к удаленному хосту
 		messageSocket->Connect(ipPoint);
+		//начинаем слушать хоста
+		Task^ messageListener = gcnew Task(gcnew Action(this, &ClientWindow::startMessageReceiving));
+		messageListener->Start();
 
-		array<unsigned char>^ sendData = Encoding::Unicode->GetBytes(name);
-		messageSocket->Send(sendData);
+		array<unsigned char>^ nameData = Encoding::Unicode->GetBytes(name);
+		messageSocket->Send(nameData);
 
 		connectSuccess = true;
 	}
@@ -42,7 +47,10 @@ void ClientWindow::clientConnect() {
 void ClientWindow::itemDisconnect_Click(System::Object^  sender, System::EventArgs^  e){
 	setChatWorking(false);
 	try {
-		//messageSocket->Shutdown(SocketShutdown::Both);
+		String^ msg = "&disconnect";
+		array<unsigned char>^ sendDisconnect = Encoding::Unicode->GetBytes(msg);
+		messageSocket->Send(sendDisconnect);
+
 		messageSocket->Close();
 	} 
 	catch (Exception^ ex) {
@@ -68,6 +76,8 @@ void ClientWindow::setChatWorking(bool toStart) {
 	}
 }
 
+/*---*/
+
 void ClientWindow::buttonSendMsg_Click(System::Object^  sender, System::EventArgs^  e) {
 	if (textBoxMessage->Equals("")) {
 		return;
@@ -88,20 +98,40 @@ void ClientWindow::sendMessage() {
 		MessageBox::Show("Error code: " + ex->ErrorCode + ". " + ex->Message, "Error",
 			MessageBoxButtons::OK, MessageBoxIcon::Error);
 	}
-
-	/*// получаем ответ
-	data = new byte[256]; // буфер для ответа
-	StringBuilder builder = new StringBuilder();
-	int bytes = 0; // количество полученных байт
-
-	do
-	{
-		bytes = socket.Receive(data, data.Length, 0);
-		builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-	} while (socket.Available > 0);
-	Console.WriteLine("ответ сервера: " + builder.ToString());*/
 }
 
 void ClientWindow::setMessage(String^ message) {
 	textBoxMessage->Text = message;
+}
+
+/*---*/
+
+void ClientWindow::startMessageReceiving() {
+	MessageDelegate^ msg = gcnew MessageDelegate(this, &ClientWindow::addChatMessage);
+	while (true) {
+		try {
+			array<unsigned char>^ receiveData = gcnew array<unsigned char>(256); // буфер для ответа
+			StringBuilder^ builder = gcnew StringBuilder();
+			int bytes = 0; // количество полученных байт
+
+			do { //получаем ответ
+				bytes = messageSocket->Receive(receiveData);
+				builder->Append(Encoding::Unicode->GetString(receiveData, 0, bytes));
+			} while (messageSocket->Available > 0);
+
+			this->BeginInvoke(gcnew MessageDelegate(this, &ClientWindow::addChatMessage), builder->ToString());
+		}
+		catch (SocketException^ ex) {
+			if (ex->ErrorCode != 10054 && ex->ErrorCode != 10053) {
+				MessageBox::Show("Error code: " + ex->ErrorCode + ". " + ex->Message, "Ошибка",
+					MessageBoxButtons::OK, MessageBoxIcon::Error);
+			}
+			break;
+		}
+		catch (ObjectDisposedException^ ex) { break; }
+	}
+}
+
+void ClientWindow::addChatMessage(String^ message) {
+	this->textBoxChat->Text += message;
 }

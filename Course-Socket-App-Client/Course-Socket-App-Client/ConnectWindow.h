@@ -104,6 +104,7 @@ namespace CourseSocketAppClient {
 			this->textBoxPort->Name = L"textBoxPort";
 			this->textBoxPort->Size = System::Drawing::Size(74, 22);
 			this->textBoxPort->TabIndex = 5;
+			this->textBoxPort->Text = L"8080";
 			// 
 			// label3
 			// 

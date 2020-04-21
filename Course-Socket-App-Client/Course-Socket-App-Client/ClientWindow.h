@@ -212,10 +212,12 @@ namespace CourseSocketAppClient {
 
 	private: void buttonSendMsg_Click(System::Object^  sender, System::EventArgs^  e);
 
-	private: void sendMessage(); 
-			 delegate void MessageDelegate(String^ message);
-			 void setMessage(String^ message);
-			 
+	private: delegate void MessageDelegate(String^ message);
 
+	private: void sendMessage(); 
+			 void setMessage(String^ message); 
+
+	private: void startMessageReceiving();
+			 void addChatMessage(String^ message);
 };
 }
