@@ -147,24 +147,24 @@ namespace CourseSocketApp {
 
 		}
 #pragma endregion
-		//main code
-	private: IPAddress^ ip;
+	private: List<String^>^ chatPool;
+			 List<Socket^>^ connected;
+			 IPAddress^ ip;
 			 bool isStarted;
-			 Task^ serverTask;
 			 Hashtable^ userDB;
+			 Socket^ mainSocket;
 			 
-	private: Socket^ mainSocket;
-			 void button_on_off_server_Click(System::Object^  sender, System::EventArgs^  e);
+	private: void button_on_off_server_Click(System::Object^  sender, System::EventArgs^  e);
 			 void serverStart();
-			 void startMessageGetting(Socket^ handler);
+
+	private: void startMessageGetting(Object^ handler);
+			 int ServerWindow::synchronizeMessages(Socket^ handler, int lastMessage);
 
 	private: delegate void SocketDelegate(Socket^ mainSocket);
 			 void setSocket(Socket^ mainSocket);
 	
 	private: delegate void MessageDelegate(String^ user, String^ msg);
 			 void serverMessage(String^ user, String^ msg);
-
-	private: static bool isSocketStillConnected(Socket^ socket);
 
 	private: void setChatWorking(bool isWorking);
 
