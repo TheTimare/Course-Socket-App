@@ -16,6 +16,6 @@ Written on C++/CLI.
 4. Now the project can be compiled
 
 ### Additionally
-To start the project user should have installed:
+To start a project, user must install:
 * C++/CLI support in visual studio
 * .net 4.6.1 in visual studio
