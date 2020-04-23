@@ -5,7 +5,10 @@ using namespace CourseSocketAppClient;
 
 ClientWindow::ClientWindow() {
 	InitializeComponent();
+	AutoScaleDimensions = System::Drawing::SizeF(96, 96);
+
 	setChatWorking(false);
+	addChatMessage("Hi there. To connect to the server, open the \"server\" tab above and click \"Connect\".\r\n");
 }
 
 /*---*/
@@ -16,14 +19,15 @@ void ClientWindow::itemConnect_Click(System::Object^  sender, System::EventArgs^
 	connect->ShowDialog();
 	if (!inputSuccess) return;
 
-	clientConnect();
+	connectToTheServer();
 
 	if (connectSuccess) {
 		setChatWorking(true);
+		addChatMessage("You are connected to the server!\r\n");
 	}
 }
 
-void ClientWindow::clientConnect() {
+void ClientWindow::connectToTheServer() {
 	try {
 		IPEndPoint^ ipPoint = gcnew IPEndPoint(ip, port);
 		messageSocket = gcnew Socket(AddressFamily::InterNetwork, SocketType::Stream, ProtocolType::Tcp);
@@ -48,14 +52,18 @@ void ClientWindow::itemDisconnect_Click(System::Object^  sender, System::EventAr
 	setChatWorking(false);
 	try {
 		String^ msg = "&disconnect";
-		array<unsigned char>^ sendDisconnect = Encoding::Unicode->GetBytes(msg);
-		messageSocket->Send(sendDisconnect);
+		array<unsigned char>^ sendCommand = Encoding::Unicode->GetBytes(msg);
+		messageSocket->Send(sendCommand);
+		addChatMessage("You have been disconnected...\r\n");
 
 		messageSocket->Close();
 	} 
-	catch (Exception^ ex) {
-		MessageBox::Show("Close connection error." + ex->Message, "Error",
-			MessageBoxButtons::OK, MessageBoxIcon::Error);
+	catch (SocketException^ ex) {
+		MessageBox::Show(ex->ErrorCode + ": " + ex->Message, "Error",
+				MessageBoxButtons::OK, MessageBoxIcon::Error);
+		if (ex->ErrorCode == 10054) {
+			addChatMessage("You have been disconnected...\r\n");
+		}
 	}
 }
 
@@ -88,6 +96,8 @@ void ClientWindow::buttonSendMsg_Click(System::Object^  sender, System::EventArg
 
 void ClientWindow::sendMessage() {
 	String^ msg = textBoxMessage->Text;
+	msg = msg->Trim();
+	msg = msg->Replace("&", "");
 	this->BeginInvoke(gcnew MessageDelegate(this, &ClientWindow::setMessage), "");
 
 	array<unsigned char>^ sendData = Encoding::Unicode->GetBytes(msg);
@@ -122,10 +132,11 @@ void ClientWindow::startMessageReceiving() {
 			this->BeginInvoke(gcnew MessageDelegate(this, &ClientWindow::addChatMessage), builder->ToString());
 		}
 		catch (SocketException^ ex) {
-			if (ex->ErrorCode != 10054 && ex->ErrorCode != 10053) {
+			if (ex->ErrorCode != 10054) {
 				MessageBox::Show("Error code: " + ex->ErrorCode + ". " + ex->Message, "Îøèáêà",
 					MessageBoxButtons::OK, MessageBoxIcon::Error);
 			}
+			this->BeginInvoke(gcnew EventDelegate(this, &ClientWindow::itemDisconnect_Click), gcnew Object, gcnew EventArgs);
 			break;
 		}
 		catch (ObjectDisposedException^ ex) { break; }

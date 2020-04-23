@@ -72,11 +72,14 @@ namespace CourseSocketAppClient {
 			// 
 			this->textBoxChat->BackColor = System::Drawing::SystemColors::ButtonHighlight;
 			this->textBoxChat->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
-			this->textBoxChat->Location = System::Drawing::Point(12, 40);
+			this->textBoxChat->Font = (gcnew System::Drawing::Font(L"Open Sans", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(204)));
+			this->textBoxChat->Location = System::Drawing::Point(12, 45);
 			this->textBoxChat->Multiline = true;
 			this->textBoxChat->Name = L"textBoxChat";
 			this->textBoxChat->ReadOnly = true;
-			this->textBoxChat->Size = System::Drawing::Size(682, 355);
+			this->textBoxChat->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
+			this->textBoxChat->Size = System::Drawing::Size(594, 312);
 			this->textBoxChat->TabIndex = 1;
 			this->textBoxChat->TabStop = false;
 			// 
@@ -84,17 +87,17 @@ namespace CourseSocketAppClient {
 			// 
 			this->textBoxMessage->BackColor = System::Drawing::SystemColors::ButtonHighlight;
 			this->textBoxMessage->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
-			this->textBoxMessage->Location = System::Drawing::Point(12, 401);
+			this->textBoxMessage->Location = System::Drawing::Point(12, 363);
 			this->textBoxMessage->Multiline = true;
 			this->textBoxMessage->Name = L"textBoxMessage";
-			this->textBoxMessage->Size = System::Drawing::Size(584, 45);
+			this->textBoxMessage->Size = System::Drawing::Size(509, 50);
 			this->textBoxMessage->TabIndex = 0;
 			// 
 			// buttonSendMsg
 			// 
-			this->buttonSendMsg->Location = System::Drawing::Point(603, 401);
+			this->buttonSendMsg->Location = System::Drawing::Point(527, 363);
 			this->buttonSendMsg->Name = L"buttonSendMsg";
-			this->buttonSendMsg->Size = System::Drawing::Size(91, 45);
+			this->buttonSendMsg->Size = System::Drawing::Size(79, 50);
 			this->buttonSendMsg->TabIndex = 2;
 			this->buttonSendMsg->Text = L"Send Message";
 			this->buttonSendMsg->UseVisualStyleBackColor = true;
@@ -108,7 +111,7 @@ namespace CourseSocketAppClient {
 			this->toolStrip1->Location = System::Drawing::Point(0, 0);
 			this->toolStrip1->Name = L"toolStrip1";
 			this->toolStrip1->RenderMode = System::Windows::Forms::ToolStripRenderMode::Professional;
-			this->toolStrip1->Size = System::Drawing::Size(706, 27);
+			this->toolStrip1->Size = System::Drawing::Size(618, 27);
 			this->toolStrip1->TabIndex = 11;
 			this->toolStrip1->Text = L"toolStrip1";
 			// 
@@ -144,14 +147,16 @@ namespace CourseSocketAppClient {
 			// ClientWindow
 			// 
 			this->AcceptButton = this->buttonSendMsg;
-			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
-			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
+			this->AutoScaleDimensions = System::Drawing::SizeF(120, 120);
+			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
 			this->BackColor = System::Drawing::SystemColors::Window;
-			this->ClientSize = System::Drawing::Size(706, 458);
+			this->ClientSize = System::Drawing::Size(618, 423);
 			this->Controls->Add(this->toolStrip1);
 			this->Controls->Add(this->buttonSendMsg);
 			this->Controls->Add(this->textBoxMessage);
 			this->Controls->Add(this->textBoxChat);
+			this->Font = (gcnew System::Drawing::Font(L"Open Sans", 7.8F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(204)));
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedSingle;
 			this->MaximizeBox = false;
 			this->Name = L"ClientWindow";
@@ -204,7 +209,7 @@ namespace CourseSocketAppClient {
 		
 	private: void itemConnect_Click(System::Object^  sender, System::EventArgs^  e);
 
-	private: void clientConnect();
+	private: void ClientWindow::connectToTheServer();
 
 	private: void itemDisconnect_Click(System::Object^  sender, System::EventArgs^  e);
 
@@ -213,6 +218,7 @@ namespace CourseSocketAppClient {
 	private: void buttonSendMsg_Click(System::Object^  sender, System::EventArgs^  e);
 
 	private: delegate void MessageDelegate(String^ message);
+			 delegate void EventDelegate(Object^ sender, EventArgs^ e);
 
 	private: void sendMessage(); 
 			 void setMessage(String^ message); 
