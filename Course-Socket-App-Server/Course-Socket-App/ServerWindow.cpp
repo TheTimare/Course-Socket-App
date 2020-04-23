@@ -10,6 +10,7 @@ ServerWindow::ServerWindow(void) {
 	chatPool = gcnew List<String^>();
 	connected = gcnew List<Socket^>();
 	isStarted = false;
+
 	//get pc address
 	IPHostEntry^ host = Dns::GetHostEntry(Dns::GetHostName());
 	for (int i = 0; i < host->AddressList->Length; i++) {
@@ -55,12 +56,18 @@ void ServerWindow::setSocket(Socket^ mainSocket) {
 void ServerWindow::setChatWorking(bool toStart) {
 	if (toStart) {
 		textBoxPort->ReadOnly = true;
+		buttonSendMsg->Enabled = true;
+		textBoxMessage->ReadOnly = false;
+		textBoxMessage->BackColor = System::Drawing::SystemColors::ButtonHighlight;
 		domainUpDownIPs->BackColor = System::Drawing::SystemColors::Control;
 		button_on_off_server->Text = "Shutdown Server";
 		isStarted = true;
 	}
 	else {
 		textBoxPort->ReadOnly = false;
+		buttonSendMsg->Enabled = false;
+		textBoxMessage->ReadOnly = true;
+		textBoxMessage->BackColor = System::Drawing::SystemColors::Control;
 		domainUpDownIPs->BackColor = System::Drawing::SystemColors::Window;
 		button_on_off_server->Text = "Start Server";
 		isStarted = false;
@@ -224,4 +231,11 @@ void ServerWindow::startSynchronizeMessages(Object^ handler) {
 void ServerWindow::domainUpDownIPs_SelectedItemChanged(System::Object^  sender, System::EventArgs^  e) {
 	if (isStarted)
 		domainUpDownIPs->SelectedIndex = selectedIP;
+}
+
+/*-----*/
+
+void ServerWindow::buttonSendMsg_Click(System::Object^  sender, System::EventArgs^  e) {
+	serverMessage("SYSTEM", textBoxMessage->Text);
+	textBoxMessage->Text = "";
 }

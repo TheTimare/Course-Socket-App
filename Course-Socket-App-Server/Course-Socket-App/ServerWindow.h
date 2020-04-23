@@ -43,6 +43,8 @@ namespace CourseSocketApp {
 
 
 	private: System::Windows::Forms::DomainUpDown^  domainUpDownIPs;
+	private: System::Windows::Forms::Button^  buttonSendMsg;
+	private: System::Windows::Forms::TextBox^  textBoxMessage;
 
 
 
@@ -68,6 +70,8 @@ namespace CourseSocketApp {
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->textBoxPort = (gcnew System::Windows::Forms::TextBox());
 			this->domainUpDownIPs = (gcnew System::Windows::Forms::DomainUpDown());
+			this->buttonSendMsg = (gcnew System::Windows::Forms::Button());
+			this->textBoxMessage = (gcnew System::Windows::Forms::TextBox());
 			this->SuspendLayout();
 			// 
 			// textBoxChat
@@ -78,12 +82,12 @@ namespace CourseSocketApp {
 			this->textBoxChat->Font = (gcnew System::Drawing::Font(L"Open Sans", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
 			this->textBoxChat->ImeMode = System::Windows::Forms::ImeMode::NoControl;
-			this->textBoxChat->Location = System::Drawing::Point(172, 14);
+			this->textBoxChat->Location = System::Drawing::Point(165, 14);
 			this->textBoxChat->Multiline = true;
 			this->textBoxChat->Name = L"textBoxChat";
 			this->textBoxChat->ReadOnly = true;
 			this->textBoxChat->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-			this->textBoxChat->Size = System::Drawing::Size(518, 459);
+			this->textBoxChat->Size = System::Drawing::Size(525, 403);
 			this->textBoxChat->TabIndex = 0;
 			this->textBoxChat->TabStop = false;
 			// 
@@ -91,7 +95,7 @@ namespace CourseSocketApp {
 			// 
 			this->button_on_off_server->Location = System::Drawing::Point(16, 438);
 			this->button_on_off_server->Name = L"button_on_off_server";
-			this->button_on_off_server->Size = System::Drawing::Size(148, 35);
+			this->button_on_off_server->Size = System::Drawing::Size(143, 35);
 			this->button_on_off_server->TabIndex = 1;
 			this->button_on_off_server->Text = L"Start Server";
 			this->button_on_off_server->UseVisualStyleBackColor = true;
@@ -126,12 +130,38 @@ namespace CourseSocketApp {
 			this->domainUpDownIPs->Wrap = true;
 			this->domainUpDownIPs->SelectedItemChanged += gcnew System::EventHandler(this, &ServerWindow::domainUpDownIPs_SelectedItemChanged);
 			// 
+			// buttonSendMsg
+			// 
+			this->buttonSendMsg->Enabled = false;
+			this->buttonSendMsg->Location = System::Drawing::Point(601, 423);
+			this->buttonSendMsg->Name = L"buttonSendMsg";
+			this->buttonSendMsg->Size = System::Drawing::Size(89, 50);
+			this->buttonSendMsg->TabIndex = 8;
+			this->buttonSendMsg->Text = L"Send Message";
+			this->buttonSendMsg->UseVisualStyleBackColor = true;
+			this->buttonSendMsg->Click += gcnew System::EventHandler(this, &ServerWindow::buttonSendMsg_Click);
+			// 
+			// textBoxMessage
+			// 
+			this->textBoxMessage->BackColor = System::Drawing::SystemColors::Control;
+			this->textBoxMessage->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
+			this->textBoxMessage->Font = (gcnew System::Drawing::Font(L"Open Sans", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(204)));
+			this->textBoxMessage->Location = System::Drawing::Point(165, 423);
+			this->textBoxMessage->Multiline = true;
+			this->textBoxMessage->Name = L"textBoxMessage";
+			this->textBoxMessage->Size = System::Drawing::Size(430, 50);
+			this->textBoxMessage->TabIndex = 7;
+			// 
 			// ServerWindow
 			// 
+			this->AcceptButton = this->buttonSendMsg;
 			this->AutoScaleDimensions = System::Drawing::SizeF(120, 120);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
 			this->BackColor = System::Drawing::SystemColors::HighlightText;
 			this->ClientSize = System::Drawing::Size(700, 486);
+			this->Controls->Add(this->buttonSendMsg);
+			this->Controls->Add(this->textBoxMessage);
 			this->Controls->Add(this->domainUpDownIPs);
 			this->Controls->Add(this->textBoxPort);
 			this->Controls->Add(this->label1);
@@ -173,5 +203,7 @@ namespace CourseSocketApp {
 	private: void setChatWorking(bool isWorking);
 
 	private: void domainUpDownIPs_SelectedItemChanged(System::Object^  sender, System::EventArgs^  e);
+
+	private: void buttonSendMsg_Click(System::Object^  sender, System::EventArgs^  e);
 };
 }

@@ -79,7 +79,7 @@ namespace CourseSocketAppClient {
 			this->textBoxChat->Name = L"textBoxChat";
 			this->textBoxChat->ReadOnly = true;
 			this->textBoxChat->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-			this->textBoxChat->Size = System::Drawing::Size(594, 312);
+			this->textBoxChat->Size = System::Drawing::Size(594, 361);
 			this->textBoxChat->TabIndex = 1;
 			this->textBoxChat->TabStop = false;
 			// 
@@ -87,7 +87,9 @@ namespace CourseSocketAppClient {
 			// 
 			this->textBoxMessage->BackColor = System::Drawing::SystemColors::ButtonHighlight;
 			this->textBoxMessage->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
-			this->textBoxMessage->Location = System::Drawing::Point(12, 363);
+			this->textBoxMessage->Font = (gcnew System::Drawing::Font(L"Open Sans", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(204)));
+			this->textBoxMessage->Location = System::Drawing::Point(12, 412);
 			this->textBoxMessage->Multiline = true;
 			this->textBoxMessage->Name = L"textBoxMessage";
 			this->textBoxMessage->Size = System::Drawing::Size(509, 50);
@@ -95,7 +97,7 @@ namespace CourseSocketAppClient {
 			// 
 			// buttonSendMsg
 			// 
-			this->buttonSendMsg->Location = System::Drawing::Point(527, 363);
+			this->buttonSendMsg->Location = System::Drawing::Point(527, 412);
 			this->buttonSendMsg->Name = L"buttonSendMsg";
 			this->buttonSendMsg->Size = System::Drawing::Size(79, 50);
 			this->buttonSendMsg->TabIndex = 2;
@@ -150,7 +152,7 @@ namespace CourseSocketAppClient {
 			this->AutoScaleDimensions = System::Drawing::SizeF(120, 120);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
 			this->BackColor = System::Drawing::SystemColors::Window;
-			this->ClientSize = System::Drawing::Size(618, 423);
+			this->ClientSize = System::Drawing::Size(618, 474);
 			this->Controls->Add(this->toolStrip1);
 			this->Controls->Add(this->buttonSendMsg);
 			this->Controls->Add(this->textBoxMessage);
