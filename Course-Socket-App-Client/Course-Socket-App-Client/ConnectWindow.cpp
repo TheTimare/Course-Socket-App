@@ -3,6 +3,12 @@
 
 using namespace CourseSocketAppClient;
 
+ConnectWindow::ConnectWindow(ClientWindow^ client) {
+	InitializeComponent();
+	mainWindow = client;
+	AutoScaleDimensions = System::Drawing::SizeF(96, 96);
+}
+
 System::Void ConnectWindow::buttonConnect_Click(System::Object^  sender, System::EventArgs^  e) {
 	try {
 		mainWindow->setPort(Convert::ToInt32(textBoxPort->Text));

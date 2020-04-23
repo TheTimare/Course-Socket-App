@@ -18,11 +18,7 @@ namespace CourseSocketAppClient {
 	public ref class ConnectWindow : public System::Windows::Forms::Form
 	{
 	public:
-		ConnectWindow(ClientWindow^ client)
-		{
-			InitializeComponent();
-			mainWindow = client;
-		}
+		ConnectWindow(ClientWindow^ client);
 
 	protected:
 		/// <summary>
