@@ -70,6 +70,7 @@ void ClientWindow::itemDisconnect_Click(System::Object^  sender, System::EventAr
 void ClientWindow::setChatWorking(bool toStart) {
 	if (toStart){
 		itemDisconnect->Available = true;
+		itemConnect->Available = false;
 		textBoxMessage->BackColor = System::Drawing::SystemColors::Window;
 		textBoxMessage->ReadOnly = false;
 		textBoxMessage->BackColor = System::Drawing::SystemColors::ButtonHighlight;
@@ -77,6 +78,7 @@ void ClientWindow::setChatWorking(bool toStart) {
 	}
 	else {
 		itemDisconnect->Available = false;
+		itemConnect->Available = true;
 		connectSuccess = false;
 		textBoxMessage->ReadOnly = true;
 		textBoxMessage->BackColor = System::Drawing::SystemColors::MenuBar;
