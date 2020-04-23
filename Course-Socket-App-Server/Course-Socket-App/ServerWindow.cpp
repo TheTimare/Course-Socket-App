@@ -2,6 +2,36 @@
 
 using namespace CourseSocketApp;
 
+
+ServerWindow::ServerWindow(void) {
+	InitializeComponent();
+	AutoScaleDimensions = System::Drawing::SizeF(96, 96);
+
+	userDB = gcnew Hashtable();
+	chatPool = gcnew List<String^>();
+	connected = gcnew List<Socket^>();
+	isStarted = false;
+	//get pc address
+	IPHostEntry^ host = Dns::GetHostEntry(Dns::GetHostName());
+	for (int i = 0; i < host->AddressList->Length; i++) {
+		if (host->AddressList[i]->AddressFamily == AddressFamily::InterNetwork) {
+			domainUpDownIPs->Items->Add(host->AddressList[i]);
+		}
+	}
+	if (domainUpDownIPs->Items->Count == 0) {
+		button_on_off_server->Enabled = false;
+		buttonSetIP->Enabled = false;
+		MessageBox::Show("No IPs available to start the server!\n"
+			"Check your internet connection.The server cannot be started."
+			, "Error",
+			MessageBoxButtons::OK, MessageBoxIcon::Error);
+		return;
+	}
+	domainUpDownIPs->SelectedIndex = 0;
+	textBoxIP->Text = domainUpDownIPs->SelectedItem->ToString();
+	selectedIP = 0;
+}
+
 /*-----*/
 
 String^ stripPortIP(String^ endPoint) {
@@ -28,38 +58,36 @@ void ServerWindow::setSocket(Socket^ mainSocket) {
 void ServerWindow::setChatWorking(bool toStart) {
 	if (toStart) {
 		textBoxPort->ReadOnly = true;
+		buttonSetIP->Enabled = false;
 		button_on_off_server->Text = "Shutdown Server";
 		isStarted = true;
 	}
 	else {
 		textBoxPort->ReadOnly = false;
+		buttonSetIP->Enabled = true;
 		button_on_off_server->Text = "Start Server";
 		isStarted = false;
 	}
 }
 
-/*-----*/
-
-ServerWindow::ServerWindow(void) {
-	InitializeComponent();
-	userDB = gcnew Hashtable();
-	chatPool = gcnew List<String^>();
-	connected = gcnew List<Socket^>();
-	this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
-	isStarted = false;
-	//get pc address
-	IPHostEntry^ host = Dns::GetHostEntry(Dns::GetHostName());
-	for (int i = 0; i < host->AddressList->Length; i++) {
-		if (host->AddressList[i]->AddressFamily == AddressFamily::InterNetwork)
-		{
-			ip = host->AddressList[i];
-			textBoxIP->Text = ip->ToString();
-			break;
-		}
+//commands must begin with the symbol '&'
+void ServerWindow::sendSystemCommand(Socket^ connection, String^ command) {
+	if (command->Length == 0 || command[0] != '&')
+		return;
+	array<unsigned char>^ data;
+	data = Encoding::Unicode->GetBytes(command);
+	try {
+		connection->Send(data);
 	}
+	catch (...) {}
 }
 
 /*-----*/
+
+void ServerWindow::buttonSetIP_Click(System::Object^  sender, System::EventArgs^  e) {
+	selectedIP = domainUpDownIPs->SelectedIndex;
+	textBoxIP->Text = domainUpDownIPs->SelectedItem->ToString();
+}
 
 void ServerWindow::button_on_off_server_Click(System::Object^  sender, System::EventArgs^  e) {
 	if (!isStarted) {
@@ -71,8 +99,10 @@ void ServerWindow::button_on_off_server_Click(System::Object^  sender, System::E
 	else {
 		setChatWorking(false);
 		mainSocket->Close();
-		for (int i = 0; i < connected->Count; i++)
+		for (int i = 0; i < connected->Count; i++) {
+			//sendSystemCommand(connected[i], "&server_off");
 			connected[i]->Close();
+		}
 		serverMessage("SYSTEM", "Server is off.");
 	}
 }
@@ -87,14 +117,12 @@ void ServerWindow::serverStart() {
 			MessageBoxButtons::OK, MessageBoxIcon::Error);
 		return;
 	}
-
-	// получаем адреса для запуска сокета
-	IPEndPoint^ ipPoint = gcnew IPEndPoint(ip, port);
+	
+	IPAddress^ ip = (IPAddress^)domainUpDownIPs->Items[selectedIP];
+	IPEndPoint^ ipPoint = gcnew IPEndPoint(ip, port); // получаем адреса для запуска сокета
 	Socket^ listenSocket = gcnew Socket(AddressFamily::InterNetwork, SocketType::Stream, ProtocolType::Tcp);
-	// связываем сокет с локальной точкой, по которой будем принимать данные
-	listenSocket->Bind(ipPoint);
-	// начинаем прослушивание
-	listenSocket->Listen(10);
+	listenSocket->Bind(ipPoint); // связываем сокет с локальной точкой, по которой будем принимать данные
+	listenSocket->Listen(25); // начинаем прослушивание
 
 	this->BeginInvoke(gcnew SocketDelegate(this, &ServerWindow::setSocket), listenSocket);
 	while (isStarted) {
@@ -107,8 +135,10 @@ void ServerWindow::serverStart() {
 			}
 			else {
 				connected->Add(handler);
-				Task^ messageTask = gcnew Task((Action<Object^>^)(gcnew Action<Object^>(this, &ServerWindow::startMessageGetting)), handler);
-				messageTask->Start();
+				Task^ messageGet = gcnew Task((Action<Object^>^)(gcnew Action<Object^>(this, &ServerWindow::startMessageGetting)), handler);
+				Task^ messageSynchronize = gcnew Task((Action<Object^>^)(gcnew Action<Object^>(this, &ServerWindow::startSynchronizeMessages)), handler);
+				messageGet->Start();
+				messageSynchronize->Start();
 			}
 		}
 		catch (SocketException^ ex) {
@@ -126,7 +156,6 @@ void ServerWindow::startMessageGetting(Object^ handler) {
 	Socket^ localHandler = (Socket^)handler;
 	MessageDelegate^ msg = gcnew MessageDelegate(this, &ServerWindow::serverMessage);
 	bool getUserName = true;
-	int lastMsg = 0;
 	String^ clientIP;
 	while (true) {
 		try {
@@ -145,6 +174,7 @@ void ServerWindow::startMessageGetting(Object^ handler) {
 
 			if (getUserName) {
 				clientIP = stripPortIP(localHandler->RemoteEndPoint->ToString());
+				if (userDB->ContainsValue(builder->ToString())) builder->Append("1");
 				userDB[clientIP] = builder->ToString();
 				this->BeginInvoke(msg, "SYSTEM", userDB[clientIP] + " joined the chat.");
 				getUserName = false;
@@ -152,11 +182,9 @@ void ServerWindow::startMessageGetting(Object^ handler) {
 			else {
 				this->BeginInvoke(msg, userDB[clientIP], builder->ToString());
 			}
-
-			lastMsg = synchronizeMessages(localHandler, lastMsg);
 		} 
 		catch (SocketException^ ex) {
-			if (ex->ErrorCode != 10054) {
+			if (ex->ErrorCode != 10054 && ex->ErrorCode != 10053) {
 				MessageBox::Show("Error code: " + ex->ErrorCode + ". " + ex->Message, "Ошибка",
 					MessageBoxButtons::OK, MessageBoxIcon::Error);
 			}
@@ -173,15 +201,29 @@ void ServerWindow::startMessageGetting(Object^ handler) {
 	userDB->Remove(clientIP);
 }
 
-int ServerWindow::synchronizeMessages(Socket^ handler, int msgNum) {
+void ServerWindow::startSynchronizeMessages(Object^ handler) {
+	Socket^ localHandler = (Socket^)handler;
 	array<unsigned char>^ data;
-
-	for (int i = msgNum; i < chatPool->Count; i++) {
-		data = Encoding::Unicode->GetBytes(chatPool[i]);
-		handler->Send(data);
-	}
 	int lastMsg = chatPool->Count;
-	return lastMsg;
+	while (true) {
+		System::Threading::Thread::Sleep(250);
+		if (lastMsg == chatPool->Count) continue;
+
+		try {
+			for (int i = lastMsg; i < chatPool->Count; i++) {
+				data = Encoding::Unicode->GetBytes(chatPool[i]);
+				localHandler->Send(data);
+			}
+		}
+		catch (SocketException^ ex) {
+			return;
+		}
+		catch (ObjectDisposedException^ ex) {
+			return;
+		}
+
+		lastMsg = chatPool->Count;
+	}
 }
 
 /*-----*/
