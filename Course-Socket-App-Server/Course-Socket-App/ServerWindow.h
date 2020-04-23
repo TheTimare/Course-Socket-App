@@ -40,12 +40,12 @@ namespace CourseSocketApp {
 	private: System::Windows::Forms::Label^  label1;
 	private: System::Windows::Forms::TextBox^  textBoxPort;
 
-	private: System::Windows::Forms::Label^  labelIP;
+
 
 	private: System::Windows::Forms::DomainUpDown^  domainUpDownIPs;
-	private: System::Windows::Forms::Button^  buttonSetIP;
 
-	private: System::Windows::Forms::TextBox^  textBoxIP;
+
+
 
 	protected:
 
@@ -62,14 +62,12 @@ namespace CourseSocketApp {
 		/// </summary>
 		void InitializeComponent(void)
 		{
+			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(ServerWindow::typeid));
 			this->textBoxChat = (gcnew System::Windows::Forms::TextBox());
 			this->button_on_off_server = (gcnew System::Windows::Forms::Button());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->textBoxPort = (gcnew System::Windows::Forms::TextBox());
-			this->labelIP = (gcnew System::Windows::Forms::Label());
 			this->domainUpDownIPs = (gcnew System::Windows::Forms::DomainUpDown());
-			this->buttonSetIP = (gcnew System::Windows::Forms::Button());
-			this->textBoxIP = (gcnew System::Windows::Forms::TextBox());
 			this->SuspendLayout();
 			// 
 			// textBoxChat
@@ -116,43 +114,17 @@ namespace CourseSocketApp {
 			this->textBoxPort->TabIndex = 3;
 			this->textBoxPort->Text = L"8080";
 			// 
-			// labelIP
-			// 
-			this->labelIP->AutoSize = true;
-			this->labelIP->Location = System::Drawing::Point(12, 64);
-			this->labelIP->Name = L"labelIP";
-			this->labelIP->Size = System::Drawing::Size(30, 20);
-			this->labelIP->TabIndex = 4;
-			this->labelIP->Text = L"IP: ";
-			// 
 			// domainUpDownIPs
 			// 
 			this->domainUpDownIPs->BackColor = System::Drawing::SystemColors::Window;
-			this->domainUpDownIPs->Location = System::Drawing::Point(16, 95);
+			this->domainUpDownIPs->Location = System::Drawing::Point(16, 49);
 			this->domainUpDownIPs->Name = L"domainUpDownIPs";
 			this->domainUpDownIPs->ReadOnly = true;
 			this->domainUpDownIPs->Size = System::Drawing::Size(143, 28);
 			this->domainUpDownIPs->TabIndex = 6;
 			this->domainUpDownIPs->Text = L"No ip founded";
 			this->domainUpDownIPs->Wrap = true;
-			// 
-			// buttonSetIP
-			// 
-			this->buttonSetIP->Location = System::Drawing::Point(16, 129);
-			this->buttonSetIP->Name = L"buttonSetIP";
-			this->buttonSetIP->Size = System::Drawing::Size(52, 27);
-			this->buttonSetIP->TabIndex = 7;
-			this->buttonSetIP->Text = L"Set IP";
-			this->buttonSetIP->UseVisualStyleBackColor = true;
-			this->buttonSetIP->Click += gcnew System::EventHandler(this, &ServerWindow::buttonSetIP_Click);
-			// 
-			// textBoxIP
-			// 
-			this->textBoxIP->Location = System::Drawing::Point(48, 61);
-			this->textBoxIP->Name = L"textBoxIP";
-			this->textBoxIP->ReadOnly = true;
-			this->textBoxIP->Size = System::Drawing::Size(111, 28);
-			this->textBoxIP->TabIndex = 8;
+			this->domainUpDownIPs->SelectedItemChanged += gcnew System::EventHandler(this, &ServerWindow::domainUpDownIPs_SelectedItemChanged);
 			// 
 			// ServerWindow
 			// 
@@ -160,10 +132,7 @@ namespace CourseSocketApp {
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
 			this->BackColor = System::Drawing::SystemColors::HighlightText;
 			this->ClientSize = System::Drawing::Size(700, 486);
-			this->Controls->Add(this->textBoxIP);
-			this->Controls->Add(this->buttonSetIP);
 			this->Controls->Add(this->domainUpDownIPs);
-			this->Controls->Add(this->labelIP);
 			this->Controls->Add(this->textBoxPort);
 			this->Controls->Add(this->label1);
 			this->Controls->Add(this->button_on_off_server);
@@ -171,9 +140,10 @@ namespace CourseSocketApp {
 			this->Font = (gcnew System::Drawing::Font(L"Open Sans", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedSingle;
+			this->Icon = (cli::safe_cast<System::Drawing::Icon^>(resources->GetObject(L"$this.Icon")));
 			this->MaximizeBox = false;
 			this->Name = L"ServerWindow";
-			this->Text = L"SocketChat";
+			this->Text = L"SocketChat Server";
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -186,8 +156,7 @@ namespace CourseSocketApp {
 			 Hashtable^ userDB;
 			 Socket^ mainSocket;
 			 
-	private: void buttonSetIP_Click(System::Object^  sender, System::EventArgs^  e);
-			 void button_on_off_server_Click(System::Object^  sender, System::EventArgs^  e);
+	private: void button_on_off_server_Click(System::Object^  sender, System::EventArgs^  e);
 			 void serverStart();
 
 	private: void startMessageGetting(Object^ handler);
@@ -203,5 +172,6 @@ namespace CourseSocketApp {
 
 	private: void setChatWorking(bool isWorking);
 
+	private: void domainUpDownIPs_SelectedItemChanged(System::Object^  sender, System::EventArgs^  e);
 };
 }

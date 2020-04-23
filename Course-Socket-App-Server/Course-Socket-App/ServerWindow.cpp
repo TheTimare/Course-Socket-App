@@ -2,7 +2,6 @@
 
 using namespace CourseSocketApp;
 
-
 ServerWindow::ServerWindow(void) {
 	InitializeComponent();
 	AutoScaleDimensions = System::Drawing::SizeF(96, 96);
@@ -20,7 +19,6 @@ ServerWindow::ServerWindow(void) {
 	}
 	if (domainUpDownIPs->Items->Count == 0) {
 		button_on_off_server->Enabled = false;
-		buttonSetIP->Enabled = false;
 		MessageBox::Show("No IPs available to start the server!\n"
 			"Check your internet connection.The server cannot be started."
 			, "Error",
@@ -28,7 +26,6 @@ ServerWindow::ServerWindow(void) {
 		return;
 	}
 	domainUpDownIPs->SelectedIndex = 0;
-	textBoxIP->Text = domainUpDownIPs->SelectedItem->ToString();
 	selectedIP = 0;
 }
 
@@ -58,13 +55,13 @@ void ServerWindow::setSocket(Socket^ mainSocket) {
 void ServerWindow::setChatWorking(bool toStart) {
 	if (toStart) {
 		textBoxPort->ReadOnly = true;
-		buttonSetIP->Enabled = false;
+		domainUpDownIPs->BackColor = System::Drawing::SystemColors::Control;
 		button_on_off_server->Text = "Shutdown Server";
 		isStarted = true;
 	}
 	else {
 		textBoxPort->ReadOnly = false;
-		buttonSetIP->Enabled = true;
+		domainUpDownIPs->BackColor = System::Drawing::SystemColors::Window;
 		button_on_off_server->Text = "Start Server";
 		isStarted = false;
 	}
@@ -84,13 +81,9 @@ void ServerWindow::sendSystemCommand(Socket^ connection, String^ command) {
 
 /*-----*/
 
-void ServerWindow::buttonSetIP_Click(System::Object^  sender, System::EventArgs^  e) {
-	selectedIP = domainUpDownIPs->SelectedIndex;
-	textBoxIP->Text = domainUpDownIPs->SelectedItem->ToString();
-}
-
 void ServerWindow::button_on_off_server_Click(System::Object^  sender, System::EventArgs^  e) {
 	if (!isStarted) {
+		selectedIP = domainUpDownIPs->SelectedIndex;
 		Task^ serverTask = gcnew Task(gcnew Action(this, &ServerWindow::serverStart));
 		serverTask->Start();
 		setChatWorking(true);
@@ -227,3 +220,8 @@ void ServerWindow::startSynchronizeMessages(Object^ handler) {
 }
 
 /*-----*/
+
+void ServerWindow::domainUpDownIPs_SelectedItemChanged(System::Object^  sender, System::EventArgs^  e) {
+	if (isStarted)
+		domainUpDownIPs->SelectedIndex = selectedIP;
+}
