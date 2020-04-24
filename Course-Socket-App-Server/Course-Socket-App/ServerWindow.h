@@ -32,7 +32,7 @@ namespace CourseSocketApp {
 				delete components;
 			}
 		}
-	private: System::Windows::Forms::TextBox^  textBoxChat;
+
 	protected:
 
 	private: System::Windows::Forms::Button^  button_on_off_server;
@@ -45,6 +45,7 @@ namespace CourseSocketApp {
 	private: System::Windows::Forms::DomainUpDown^  domainUpDownIPs;
 	private: System::Windows::Forms::Button^  buttonSendMsg;
 	private: System::Windows::Forms::TextBox^  textBoxMessage;
+	private: System::Windows::Forms::RichTextBox^  richTextBoxChat;
 
 
 
@@ -65,31 +66,14 @@ namespace CourseSocketApp {
 		void InitializeComponent(void)
 		{
 			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(ServerWindow::typeid));
-			this->textBoxChat = (gcnew System::Windows::Forms::TextBox());
 			this->button_on_off_server = (gcnew System::Windows::Forms::Button());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->textBoxPort = (gcnew System::Windows::Forms::TextBox());
 			this->domainUpDownIPs = (gcnew System::Windows::Forms::DomainUpDown());
 			this->buttonSendMsg = (gcnew System::Windows::Forms::Button());
 			this->textBoxMessage = (gcnew System::Windows::Forms::TextBox());
+			this->richTextBoxChat = (gcnew System::Windows::Forms::RichTextBox());
 			this->SuspendLayout();
-			// 
-			// textBoxChat
-			// 
-			this->textBoxChat->BackColor = System::Drawing::SystemColors::Window;
-			this->textBoxChat->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
-			this->textBoxChat->Cursor = System::Windows::Forms::Cursors::IBeam;
-			this->textBoxChat->Font = (gcnew System::Drawing::Font(L"Open Sans", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
-				static_cast<System::Byte>(204)));
-			this->textBoxChat->ImeMode = System::Windows::Forms::ImeMode::NoControl;
-			this->textBoxChat->Location = System::Drawing::Point(165, 14);
-			this->textBoxChat->Multiline = true;
-			this->textBoxChat->Name = L"textBoxChat";
-			this->textBoxChat->ReadOnly = true;
-			this->textBoxChat->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-			this->textBoxChat->Size = System::Drawing::Size(525, 403);
-			this->textBoxChat->TabIndex = 0;
-			this->textBoxChat->TabStop = false;
 			// 
 			// button_on_off_server
 			// 
@@ -150,8 +134,22 @@ namespace CourseSocketApp {
 			this->textBoxMessage->Location = System::Drawing::Point(165, 423);
 			this->textBoxMessage->Multiline = true;
 			this->textBoxMessage->Name = L"textBoxMessage";
+			this->textBoxMessage->ReadOnly = true;
 			this->textBoxMessage->Size = System::Drawing::Size(430, 50);
 			this->textBoxMessage->TabIndex = 7;
+			// 
+			// richTextBoxChat
+			// 
+			this->richTextBoxChat->BackColor = System::Drawing::SystemColors::HighlightText;
+			this->richTextBoxChat->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
+			this->richTextBoxChat->Location = System::Drawing::Point(165, 15);
+			this->richTextBoxChat->Name = L"richTextBoxChat";
+			this->richTextBoxChat->ReadOnly = true;
+			this->richTextBoxChat->ScrollBars = System::Windows::Forms::RichTextBoxScrollBars::Vertical;
+			this->richTextBoxChat->Size = System::Drawing::Size(525, 402);
+			this->richTextBoxChat->TabIndex = 9;
+			this->richTextBoxChat->TabStop = false;
+			this->richTextBoxChat->Text = L"";
 			// 
 			// ServerWindow
 			// 
@@ -160,13 +158,13 @@ namespace CourseSocketApp {
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
 			this->BackColor = System::Drawing::SystemColors::HighlightText;
 			this->ClientSize = System::Drawing::Size(700, 486);
+			this->Controls->Add(this->richTextBoxChat);
 			this->Controls->Add(this->buttonSendMsg);
 			this->Controls->Add(this->textBoxMessage);
 			this->Controls->Add(this->domainUpDownIPs);
 			this->Controls->Add(this->textBoxPort);
 			this->Controls->Add(this->label1);
 			this->Controls->Add(this->button_on_off_server);
-			this->Controls->Add(this->textBoxChat);
 			this->Font = (gcnew System::Drawing::Font(L"Open Sans", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedSingle;

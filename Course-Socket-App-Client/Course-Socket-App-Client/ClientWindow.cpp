@@ -146,5 +146,5 @@ void ClientWindow::startMessageReceiving() {
 }
 
 void ClientWindow::addChatMessage(String^ message) {
-	textBoxChat->AppendText(message);
+	richTextBoxChat->AppendText(message);
 }

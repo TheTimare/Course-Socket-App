@@ -33,7 +33,7 @@ namespace CourseSocketAppClient {
 				delete components;
 			}
 		}
-	private: System::Windows::Forms::TextBox^  textBoxChat;
+
 	protected:
 	private: System::Windows::Forms::TextBox^  textBoxMessage;
 	private: System::Windows::Forms::Button^  buttonSendMsg;
@@ -43,6 +43,7 @@ namespace CourseSocketAppClient {
 	private: System::Windows::Forms::ToolStripMenuItem^  itemConnect;
 
 	private: System::Windows::Forms::ToolStripMenuItem^  itemDisconnect;
+	private: System::Windows::Forms::RichTextBox^  richTextBoxChat;
 
 	private:
 		/// <summary>
@@ -58,30 +59,15 @@ namespace CourseSocketAppClient {
 		void InitializeComponent(void)
 		{
 			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(ClientWindow::typeid));
-			this->textBoxChat = (gcnew System::Windows::Forms::TextBox());
 			this->textBoxMessage = (gcnew System::Windows::Forms::TextBox());
 			this->buttonSendMsg = (gcnew System::Windows::Forms::Button());
 			this->toolStrip1 = (gcnew System::Windows::Forms::ToolStrip());
 			this->toolStripDropDownButton1 = (gcnew System::Windows::Forms::ToolStripDropDownButton());
 			this->itemConnect = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->itemDisconnect = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->richTextBoxChat = (gcnew System::Windows::Forms::RichTextBox());
 			this->toolStrip1->SuspendLayout();
 			this->SuspendLayout();
-			// 
-			// textBoxChat
-			// 
-			this->textBoxChat->BackColor = System::Drawing::SystemColors::ButtonHighlight;
-			this->textBoxChat->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
-			this->textBoxChat->Font = (gcnew System::Drawing::Font(L"Open Sans", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
-				static_cast<System::Byte>(204)));
-			this->textBoxChat->Location = System::Drawing::Point(12, 45);
-			this->textBoxChat->Multiline = true;
-			this->textBoxChat->Name = L"textBoxChat";
-			this->textBoxChat->ReadOnly = true;
-			this->textBoxChat->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-			this->textBoxChat->Size = System::Drawing::Size(594, 361);
-			this->textBoxChat->TabIndex = 1;
-			this->textBoxChat->TabStop = false;
 			// 
 			// textBoxMessage
 			// 
@@ -146,6 +132,20 @@ namespace CourseSocketAppClient {
 			this->itemDisconnect->Text = L"Disconnect";
 			this->itemDisconnect->Click += gcnew System::EventHandler(this, &ClientWindow::itemDisconnect_Click);
 			// 
+			// richTextBoxChat
+			// 
+			this->richTextBoxChat->BackColor = System::Drawing::SystemColors::ButtonHighlight;
+			this->richTextBoxChat->Font = (gcnew System::Drawing::Font(L"Open Sans", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(204)));
+			this->richTextBoxChat->Location = System::Drawing::Point(12, 30);
+			this->richTextBoxChat->Name = L"richTextBoxChat";
+			this->richTextBoxChat->ReadOnly = true;
+			this->richTextBoxChat->ScrollBars = System::Windows::Forms::RichTextBoxScrollBars::Vertical;
+			this->richTextBoxChat->Size = System::Drawing::Size(594, 376);
+			this->richTextBoxChat->TabIndex = 12;
+			this->richTextBoxChat->TabStop = false;
+			this->richTextBoxChat->Text = L"";
+			// 
 			// ClientWindow
 			// 
 			this->AcceptButton = this->buttonSendMsg;
@@ -153,10 +153,10 @@ namespace CourseSocketAppClient {
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
 			this->BackColor = System::Drawing::SystemColors::Window;
 			this->ClientSize = System::Drawing::Size(618, 474);
+			this->Controls->Add(this->richTextBoxChat);
 			this->Controls->Add(this->toolStrip1);
 			this->Controls->Add(this->buttonSendMsg);
 			this->Controls->Add(this->textBoxMessage);
-			this->Controls->Add(this->textBoxChat);
 			this->Font = (gcnew System::Drawing::Font(L"Open Sans", 7.8F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedSingle;

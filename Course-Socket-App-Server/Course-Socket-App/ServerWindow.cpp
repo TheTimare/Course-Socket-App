@@ -45,7 +45,7 @@ String^ stripPortIP(String^ endPoint) {
 
 void ServerWindow::serverMessage(String^ user, String^ msg) {
 	String^ formedMessage = "[" + DateTime::Now.ToShortTimeString() + "] " + user + ": " + msg + "\r\n";
-	textBoxChat->AppendText(formedMessage);
+	richTextBoxChat->AppendText(formedMessage);
 	chatPool->Add(formedMessage);
 }
 
