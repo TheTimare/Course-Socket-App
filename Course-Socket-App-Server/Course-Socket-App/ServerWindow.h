@@ -3,6 +3,7 @@
 
 namespace CourseSocketApp {
 
+#pragma region Namespaces
 	using namespace System;
 	using namespace System::ComponentModel;
 	using namespace System::Collections;
@@ -15,24 +16,26 @@ namespace CourseSocketApp {
 	using namespace System::Net;
 	using namespace System::Net::Sockets;
 	using namespace System::Text;
+	using namespace System::IO;
+#pragma endregion
+
+#pragma region CONSTANT DEFINES
+
+	int const CLIENTS_RECEIVE_TIMEOUT = 10000;
+
+#pragma endregion
 
 	/// <summary>
 	/// Сводка для ServerWindow
 	/// </summary>
-	public ref class ServerWindow : public System::Windows::Forms::Form
-	{
+	public ref class ServerWindow : public System::Windows::Forms::Form {
+
 	public:
 		ServerWindow(void);
-
 	protected:
-		~ServerWindow()
-		{
-			if (components)
-			{
-				delete components;
-			}
-		}
+		~ServerWindow();
 
+#pragma region Generated Fields
 	protected:
 
 	private: System::Windows::Forms::Button^  button_on_off_server;
@@ -40,15 +43,15 @@ namespace CourseSocketApp {
 	private: System::Windows::Forms::Label^  label1;
 	private: System::Windows::Forms::TextBox^  textBoxPort;
 
-
-
 	private: System::Windows::Forms::DomainUpDown^  domainUpDownIPs;
 	private: System::Windows::Forms::Button^  buttonSendMsg;
 	private: System::Windows::Forms::TextBox^  textBoxMessage;
 	private: System::Windows::Forms::RichTextBox^  richTextBoxChat;
+	private: System::Windows::Forms::Button^  buttonUploadImg;
+	private: System::Windows::Forms::ContextMenuStrip^  contextMenuStripAttach;
+	private: System::Windows::Forms::ToolStripMenuItem^  toolStripAttachUpload;
 
-
-
+	private: System::ComponentModel::IContainer^  components;
 
 	protected:
 
@@ -56,7 +59,8 @@ namespace CourseSocketApp {
 		/// <summary>
 		/// Обязательная переменная конструктора.
 		/// </summary>
-		System::ComponentModel::Container ^components;
+
+#pragma endregion
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -65,6 +69,7 @@ namespace CourseSocketApp {
 		/// </summary>
 		void InitializeComponent(void)
 		{
+			this->components = (gcnew System::ComponentModel::Container());
 			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(ServerWindow::typeid));
 			this->button_on_off_server = (gcnew System::Windows::Forms::Button());
 			this->label1 = (gcnew System::Windows::Forms::Label());
@@ -73,6 +78,10 @@ namespace CourseSocketApp {
 			this->buttonSendMsg = (gcnew System::Windows::Forms::Button());
 			this->textBoxMessage = (gcnew System::Windows::Forms::TextBox());
 			this->richTextBoxChat = (gcnew System::Windows::Forms::RichTextBox());
+			this->buttonUploadImg = (gcnew System::Windows::Forms::Button());
+			this->contextMenuStripAttach = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
+			this->toolStripAttachUpload = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->contextMenuStripAttach->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// button_on_off_server
@@ -135,7 +144,7 @@ namespace CourseSocketApp {
 			this->textBoxMessage->Multiline = true;
 			this->textBoxMessage->Name = L"textBoxMessage";
 			this->textBoxMessage->ReadOnly = true;
-			this->textBoxMessage->Size = System::Drawing::Size(430, 50);
+			this->textBoxMessage->Size = System::Drawing::Size(383, 50);
 			this->textBoxMessage->TabIndex = 7;
 			// 
 			// richTextBoxChat
@@ -151,6 +160,33 @@ namespace CourseSocketApp {
 			this->richTextBoxChat->TabStop = false;
 			this->richTextBoxChat->Text = L"";
 			// 
+			// buttonUploadImg
+			// 
+			this->buttonUploadImg->ContextMenuStrip = this->contextMenuStripAttach;
+			this->buttonUploadImg->Enabled = false;
+			this->buttonUploadImg->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
+			this->buttonUploadImg->Location = System::Drawing::Point(547, 423);
+			this->buttonUploadImg->Name = L"buttonUploadImg";
+			this->buttonUploadImg->Size = System::Drawing::Size(48, 50);
+			this->buttonUploadImg->TabIndex = 10;
+			this->buttonUploadImg->Text = L"Attach";
+			this->buttonUploadImg->UseVisualStyleBackColor = true;
+			this->buttonUploadImg->Click += gcnew System::EventHandler(this, &ServerWindow::buttonUploadImg_Click);
+			// 
+			// contextMenuStripAttach
+			// 
+			this->contextMenuStripAttach->ImageScalingSize = System::Drawing::Size(20, 20);
+			this->contextMenuStripAttach->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->toolStripAttachUpload });
+			this->contextMenuStripAttach->Name = L"contextMenuStripAttach";
+			this->contextMenuStripAttach->Size = System::Drawing::Size(209, 28);
+			// 
+			// toolStripAttachUpload
+			// 
+			this->toolStripAttachUpload->Name = L"toolStripAttachUpload";
+			this->toolStripAttachUpload->Size = System::Drawing::Size(208, 24);
+			this->toolStripAttachUpload->Text = L"Upload Attachment";
+			this->toolStripAttachUpload->Click += gcnew System::EventHandler(this, &ServerWindow::toolStripAttachUpload_Click);
+			// 
 			// ServerWindow
 			// 
 			this->AcceptButton = this->buttonSendMsg;
@@ -158,6 +194,7 @@ namespace CourseSocketApp {
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
 			this->BackColor = System::Drawing::SystemColors::HighlightText;
 			this->ClientSize = System::Drawing::Size(700, 486);
+			this->Controls->Add(this->buttonUploadImg);
 			this->Controls->Add(this->richTextBoxChat);
 			this->Controls->Add(this->buttonSendMsg);
 			this->Controls->Add(this->textBoxMessage);
@@ -172,13 +209,16 @@ namespace CourseSocketApp {
 			this->MaximizeBox = false;
 			this->Name = L"ServerWindow";
 			this->Text = L"SocketChat Server";
+			this->contextMenuStripAttach->ResumeLayout(false);
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
 		}
 #pragma endregion
+
 	private: List<String^>^ chatPool;
 			 List<Socket^>^ connected;
+			 List<String^>^ imagePathes;
 			 int selectedIP;
 			 bool isStarted;
 			 Hashtable^ userDB;
@@ -187,14 +227,15 @@ namespace CourseSocketApp {
 	private: void button_on_off_server_Click(System::Object^  sender, System::EventArgs^  e);
 			 void serverStart();
 
-	private: void startMessageGetting(Object^ handler);
-			 void ServerWindow::startSynchronizeMessages(Object^ handler);
+	private: void startMessageTransfering(Object^ handler);
+			 String^ getStringMessage(Socket^ handler);
+			 Image^ getImageMessage(Socket^ handler);
+			 void addUserName(Socket^ handler);
+			 void sendChatMessage(Socket^ handler, int messageNum);
+			 void sendMessagesNum(Socket^ handler, int numOfMessages);
 
 	private: delegate void SocketDelegate(Socket^ mainSocket);
 			 void setSocket(Socket^ mainSocket);
-	
-	private: delegate void MessageDelegate(String^ user, String^ msg);
-			 void serverMessage(String^ user, String^ msg);
 	
 	private: void sendSystemCommand(Socket^ connection, String^ command);
 
@@ -203,5 +244,13 @@ namespace CourseSocketApp {
 	private: void domainUpDownIPs_SelectedItemChanged(System::Object^  sender, System::EventArgs^  e);
 
 	private: void buttonSendMsg_Click(System::Object^  sender, System::EventArgs^  e);
+			 delegate void MessageDelegate(String^ user, String^ msg);
+			 void serverMessage(String^ user, String^ msg);
+
+	private: void buttonUploadImg_Click(System::Object^  sender, System::EventArgs^  e);
+			 void toolStripAttachUpload_Click(System::Object^  sender, System::EventArgs^  e);
+			 void saveImage(Image^ image);
+			 delegate void ImageMessageDelegate(String^ user, int imageNum);
+			 void InsertChatImage(String^ user, int imageNum);
 };
 }
