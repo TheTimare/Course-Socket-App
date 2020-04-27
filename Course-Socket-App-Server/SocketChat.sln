@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.28307.1062
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SocketChat-Server", "SocketChat\SocketChat-Server.vcxproj", "{887DB07C-EF3C-4D4A-A4B0-EF16BF38BC9F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SocketChat-Client", "..\Course-Socket-App-Client\SocketChat\SocketChat-Client.vcxproj", "{2038D879-8314-4DB3-9248-534C8EC711F0}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -23,14 +21,6 @@ Global
 		{887DB07C-EF3C-4D4A-A4B0-EF16BF38BC9F}.Release|x64.Build.0 = Release|x64
 		{887DB07C-EF3C-4D4A-A4B0-EF16BF38BC9F}.Release|x86.ActiveCfg = Release|Win32
 		{887DB07C-EF3C-4D4A-A4B0-EF16BF38BC9F}.Release|x86.Build.0 = Release|Win32
-		{2038D879-8314-4DB3-9248-534C8EC711F0}.Debug|x64.ActiveCfg = Debug|x64
-		{2038D879-8314-4DB3-9248-534C8EC711F0}.Debug|x64.Build.0 = Debug|x64
-		{2038D879-8314-4DB3-9248-534C8EC711F0}.Debug|x86.ActiveCfg = Debug|Win32
-		{2038D879-8314-4DB3-9248-534C8EC711F0}.Debug|x86.Build.0 = Debug|Win32
-		{2038D879-8314-4DB3-9248-534C8EC711F0}.Release|x64.ActiveCfg = Release|x64
-		{2038D879-8314-4DB3-9248-534C8EC711F0}.Release|x64.Build.0 = Release|x64
-		{2038D879-8314-4DB3-9248-534C8EC711F0}.Release|x86.ActiveCfg = Release|Win32
-		{2038D879-8314-4DB3-9248-534C8EC711F0}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
