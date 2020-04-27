@@ -1,7 +1,7 @@
 #pragma once
 #include "ClientWindow.h"
 
-namespace CourseSocketAppClient {
+namespace SocketChatClient {
 
 	using namespace System;
 	using namespace System::ComponentModel;

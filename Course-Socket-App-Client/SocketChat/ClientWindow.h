@@ -1,6 +1,6 @@
 #pragma once
 
-namespace CourseSocketAppClient {
+namespace SocketChatClient {
 
 #pragma region Namespaces
 	using namespace System;
@@ -124,7 +124,6 @@ namespace CourseSocketAppClient {
 				this->itemConnect,
 					this->itemDisconnect
 			});
-			this->toolStripDropDownButton1->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"toolStripDropDownButton1.Image")));
 			this->toolStripDropDownButton1->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolStripDropDownButton1->Name = L"toolStripDropDownButton1";
 			this->toolStripDropDownButton1->Size = System::Drawing::Size(64, 24);
@@ -178,12 +177,12 @@ namespace CourseSocketAppClient {
 			this->contextMenuStripAttach->ImageScalingSize = System::Drawing::Size(20, 20);
 			this->contextMenuStripAttach->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->toolStripAttachUpload });
 			this->contextMenuStripAttach->Name = L"contextMenuStripAttach";
-			this->contextMenuStripAttach->Size = System::Drawing::Size(211, 56);
+			this->contextMenuStripAttach->Size = System::Drawing::Size(209, 28);
 			// 
 			// toolStripAttachUpload
 			// 
 			this->toolStripAttachUpload->Name = L"toolStripAttachUpload";
-			this->toolStripAttachUpload->Size = System::Drawing::Size(210, 24);
+			this->toolStripAttachUpload->Size = System::Drawing::Size(208, 24);
 			this->toolStripAttachUpload->Text = L"Upload Attachment";
 			this->toolStripAttachUpload->Click += gcnew System::EventHandler(this, &ClientWindow::toolStripAttachUpload_Click);
 			// 

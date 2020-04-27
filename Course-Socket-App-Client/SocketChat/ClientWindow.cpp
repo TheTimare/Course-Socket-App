@@ -1,7 +1,7 @@
 #include "ClientWindow.h"
 #include "ConnectWindow.h"
 
-using namespace CourseSocketAppClient;
+using namespace SocketChatClient;
 
 ClientWindow::ClientWindow() {
 	InitializeComponent();
