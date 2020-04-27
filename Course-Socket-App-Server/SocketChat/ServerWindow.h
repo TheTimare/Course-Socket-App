@@ -1,7 +1,7 @@
 #pragma once
 #include <cliext/utility>  
 
-namespace CourseSocketApp {
+namespace SocketChatServer {
 
 #pragma region Namespaces
 	using namespace System;

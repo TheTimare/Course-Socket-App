@@ -23,8 +23,9 @@
     <ProjectGuid>{887DB07C-EF3C-4D4A-A4B0-EF16BF38BC9F}</ProjectGuid>
     <TargetFrameworkVersion>4.6.1</TargetFrameworkVersion>
     <Keyword>ManagedCProj</Keyword>
-    <RootNamespace>CourseSocketApp</RootNamespace>
+    <RootNamespace>SocketChatServer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <ProjectName>SocketChat-Server</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

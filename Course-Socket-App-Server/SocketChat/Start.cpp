@@ -12,5 +12,5 @@ void Main(array<String^>^ args) {
 		SetProcessDPIAware();
 	Application::EnableVisualStyles();
 	Application::SetCompatibleTextRenderingDefault(false);
-	Application::Run(gcnew CourseSocketApp::ServerWindow());
+	Application::Run(gcnew SocketChatServer::ServerWindow());
 }

@@ -1,6 +1,6 @@
 #include "ServerWindow.h"
 
-using namespace CourseSocketApp;
+using namespace SocketChatServer;
 
 ServerWindow::ServerWindow(void) {
 	InitializeComponent();
