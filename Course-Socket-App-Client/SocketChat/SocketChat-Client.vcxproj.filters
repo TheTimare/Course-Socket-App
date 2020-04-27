@@ -45,8 +45,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config">
-      <Filter>Файлы ресурсов</Filter>
-    </None>
+    <None Include="app.config" />
   </ItemGroup>
 </Project>
