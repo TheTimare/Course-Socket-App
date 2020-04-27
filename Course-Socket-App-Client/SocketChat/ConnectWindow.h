@@ -3,6 +3,7 @@
 
 namespace SocketChatClient {
 
+#pragma region Namespace
 	using namespace System;
 	using namespace System::ComponentModel;
 	using namespace System::Collections;
@@ -11,6 +12,7 @@ namespace SocketChatClient {
 	using namespace System::Drawing;
 	using namespace System::Net;
 	using namespace System::Net::Sockets;
+#pragma endregion
 
 	/// <summary>
 	/// Сводка для ConnectWindow
@@ -19,18 +21,10 @@ namespace SocketChatClient {
 	{
 	public:
 		ConnectWindow(ClientWindow^ client);
-
 	protected:
-		/// <summary>
-		/// Освободить все используемые ресурсы.
-		/// </summary>
-		~ConnectWindow()
-		{
-			if (components)
-			{
-				delete components;
-			}
-		}
+		~ConnectWindow();
+
+#pragma region Generated Fields
 	private: System::Windows::Forms::Label^  label1;
 	protected:
 	private: System::Windows::Forms::TextBox^  textBoxName;
@@ -45,6 +39,7 @@ namespace SocketChatClient {
 		/// Обязательная переменная конструктора.
 		/// </summary>
 		System::ComponentModel::Container^ components;
+#pragma endregion
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -126,6 +121,7 @@ namespace SocketChatClient {
 			this->AcceptButton = this->buttonConnect;
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
+			this->BackColor = System::Drawing::SystemColors::ButtonHighlight;
 			this->ClientSize = System::Drawing::Size(184, 191);
 			this->Controls->Add(this->buttonConnect);
 			this->Controls->Add(this->textBoxPort);

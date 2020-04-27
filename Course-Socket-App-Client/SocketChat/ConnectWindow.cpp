@@ -9,6 +9,14 @@ ConnectWindow::ConnectWindow(ClientWindow^ client) {
 	AutoScaleDimensions = System::Drawing::SizeF(96, 96);
 }
 
+ConnectWindow::~ConnectWindow() {
+	if (components) {
+		delete components;
+	}
+}
+
+/*---*/
+
 System::Void ConnectWindow::buttonConnect_Click(System::Object^  sender, System::EventArgs^  e) {
 	try {
 		mainWindow->setPort(Convert::ToInt32(textBoxPort->Text));
