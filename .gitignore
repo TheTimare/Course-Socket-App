@@ -1,6 +1,7 @@
 ##Project own ignores
 
-
+#ignore downloaded by application files
+download/
 
 ##Imported ignores for visual studio
 
