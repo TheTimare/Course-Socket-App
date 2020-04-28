@@ -17,6 +17,7 @@ namespace SocketChatServer {
 	using namespace System::Net::Sockets;
 	using namespace System::Text;
 	using namespace System::IO;
+	using namespace System::Runtime::Serialization::Formatters::Binary;
 #pragma endregion
 
 #pragma region CONSTANT DEFINES
@@ -50,6 +51,12 @@ namespace SocketChatServer {
 	private: System::Windows::Forms::Button^  buttonUploadImg;
 	private: System::Windows::Forms::ContextMenuStrip^  contextMenuStripAttach;
 	private: System::Windows::Forms::ToolStripMenuItem^  toolStripAttachUpload;
+	private: System::Windows::Forms::CheckedListBox^  checkedListBoxUsers;
+
+	private: System::Windows::Forms::Label^  label2;
+	private: System::Windows::Forms::Button^  buttonUserDisconnect;
+
+
 
 	private: System::ComponentModel::IContainer^  components;
 
@@ -81,14 +88,17 @@ namespace SocketChatServer {
 			this->buttonUploadImg = (gcnew System::Windows::Forms::Button());
 			this->contextMenuStripAttach = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
 			this->toolStripAttachUpload = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->checkedListBoxUsers = (gcnew System::Windows::Forms::CheckedListBox());
+			this->label2 = (gcnew System::Windows::Forms::Label());
+			this->buttonUserDisconnect = (gcnew System::Windows::Forms::Button());
 			this->contextMenuStripAttach->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// button_on_off_server
 			// 
-			this->button_on_off_server->Location = System::Drawing::Point(16, 438);
+			this->button_on_off_server->Location = System::Drawing::Point(12, 438);
 			this->button_on_off_server->Name = L"button_on_off_server";
-			this->button_on_off_server->Size = System::Drawing::Size(143, 35);
+			this->button_on_off_server->Size = System::Drawing::Size(147, 35);
 			this->button_on_off_server->TabIndex = 1;
 			this->button_on_off_server->Text = L"Start Server";
 			this->button_on_off_server->UseVisualStyleBackColor = true;
@@ -97,7 +107,7 @@ namespace SocketChatServer {
 			// label1
 			// 
 			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(12, 18);
+			this->label1->Location = System::Drawing::Point(8, 18);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(42, 20);
 			this->label1->TabIndex = 2;
@@ -105,19 +115,19 @@ namespace SocketChatServer {
 			// 
 			// textBoxPort
 			// 
-			this->textBoxPort->Location = System::Drawing::Point(60, 15);
+			this->textBoxPort->Location = System::Drawing::Point(56, 15);
 			this->textBoxPort->Name = L"textBoxPort";
-			this->textBoxPort->Size = System::Drawing::Size(99, 28);
+			this->textBoxPort->Size = System::Drawing::Size(103, 28);
 			this->textBoxPort->TabIndex = 3;
 			this->textBoxPort->Text = L"8080";
 			// 
 			// domainUpDownIPs
 			// 
 			this->domainUpDownIPs->BackColor = System::Drawing::SystemColors::Window;
-			this->domainUpDownIPs->Location = System::Drawing::Point(16, 49);
+			this->domainUpDownIPs->Location = System::Drawing::Point(12, 49);
 			this->domainUpDownIPs->Name = L"domainUpDownIPs";
 			this->domainUpDownIPs->ReadOnly = true;
-			this->domainUpDownIPs->Size = System::Drawing::Size(143, 28);
+			this->domainUpDownIPs->Size = System::Drawing::Size(147, 28);
 			this->domainUpDownIPs->TabIndex = 6;
 			this->domainUpDownIPs->Text = L"No ip founded";
 			this->domainUpDownIPs->Wrap = true;
@@ -187,6 +197,36 @@ namespace SocketChatServer {
 			this->toolStripAttachUpload->Text = L"Upload Attachment";
 			this->toolStripAttachUpload->Click += gcnew System::EventHandler(this, &ServerWindow::toolStripAttachUpload_Click);
 			// 
+			// checkedListBoxUsers
+			// 
+			this->checkedListBoxUsers->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
+			this->checkedListBoxUsers->CheckOnClick = true;
+			this->checkedListBoxUsers->FormattingEnabled = true;
+			this->checkedListBoxUsers->Location = System::Drawing::Point(12, 115);
+			this->checkedListBoxUsers->Name = L"checkedListBoxUsers";
+			this->checkedListBoxUsers->Size = System::Drawing::Size(147, 94);
+			this->checkedListBoxUsers->TabIndex = 11;
+			// 
+			// label2
+			// 
+			this->label2->AutoSize = true;
+			this->label2->Location = System::Drawing::Point(8, 92);
+			this->label2->Name = L"label2";
+			this->label2->Size = System::Drawing::Size(125, 20);
+			this->label2->TabIndex = 12;
+			this->label2->Text = L"Connected Users";
+			// 
+			// buttonUserDisconnect
+			// 
+			this->buttonUserDisconnect->Enabled = false;
+			this->buttonUserDisconnect->Location = System::Drawing::Point(12, 215);
+			this->buttonUserDisconnect->Name = L"buttonUserDisconnect";
+			this->buttonUserDisconnect->Size = System::Drawing::Size(147, 33);
+			this->buttonUserDisconnect->TabIndex = 13;
+			this->buttonUserDisconnect->Text = L"Disconnect";
+			this->buttonUserDisconnect->UseVisualStyleBackColor = true;
+			this->buttonUserDisconnect->Click += gcnew System::EventHandler(this, &ServerWindow::buttonUserDisconnect_Click);
+			// 
 			// ServerWindow
 			// 
 			this->AcceptButton = this->buttonSendMsg;
@@ -194,6 +234,9 @@ namespace SocketChatServer {
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Dpi;
 			this->BackColor = System::Drawing::SystemColors::HighlightText;
 			this->ClientSize = System::Drawing::Size(700, 486);
+			this->Controls->Add(this->buttonUserDisconnect);
+			this->Controls->Add(this->label2);
+			this->Controls->Add(this->checkedListBoxUsers);
 			this->Controls->Add(this->buttonUploadImg);
 			this->Controls->Add(this->richTextBoxChat);
 			this->Controls->Add(this->buttonSendMsg);
@@ -230,14 +273,13 @@ namespace SocketChatServer {
 	private: void startMessageTransfering(Object^ handler);
 			 String^ getStringMessage(Socket^ handler);
 			 Image^ getImageMessage(Socket^ handler);
-			 void addUserName(Socket^ handler);
+			 String^ addUser(Socket^ handler);
+			 void removeUser(String^ ip);
 			 void sendChatMessage(Socket^ handler, int messageNum);
 			 void sendMessagesNum(Socket^ handler, int numOfMessages);
 
 	private: delegate void SocketDelegate(Socket^ mainSocket);
 			 void setSocket(Socket^ mainSocket);
-	
-	private: void sendSystemCommand(Socket^ connection, String^ command);
 
 	private: void setChatWorking(bool isWorking);
 
@@ -252,5 +294,13 @@ namespace SocketChatServer {
 			 void saveImage(Image^ image);
 			 delegate void ImageMessageDelegate(String^ user, int imageNum);
 			 void InsertChatImage(String^ user, int imageNum);
+
+	private: void sendTextMessage(Socket^ handler, String^ message);
+			 void sendImageMessage(Socket^ handler, String^ imagePath);
+
+	private: void buttonUserDisconnect_Click(System::Object^  sender, System::EventArgs^  e);
+			 delegate void CheckBoxDelegate(String^ item);
+			 void addItemToCheckBox(String^ item);
+			 void removeItemFromCheckBox(String^ item);
 };
 }

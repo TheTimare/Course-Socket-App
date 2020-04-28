@@ -22,7 +22,7 @@ ServerWindow::ServerWindow(void) {
 	if (domainUpDownIPs->Items->Count == 0) {
 		button_on_off_server->Enabled = false;
 		MessageBox::Show("No IPs available to start the server!\n"
-			"Check your internet connection.The server cannot be started."
+			"Check your internet connection. The server cannot be started."
 			, "Error",
 			MessageBoxButtons::OK, MessageBoxIcon::Error);
 		return;
@@ -66,6 +66,7 @@ void ServerWindow::setChatWorking(bool toStart) {
 		buttonSendMsg->Enabled = true;
 		buttonUploadImg->Enabled = true;
 		textBoxMessage->ReadOnly = false;
+		buttonUserDisconnect->Enabled = true;
 		textBoxMessage->BackColor = System::Drawing::SystemColors::ButtonHighlight;
 		domainUpDownIPs->BackColor = System::Drawing::SystemColors::Control;
 		button_on_off_server->Text = "Shutdown Server";
@@ -76,23 +77,12 @@ void ServerWindow::setChatWorking(bool toStart) {
 		buttonSendMsg->Enabled = false;
 		buttonUploadImg->Enabled = false;
 		textBoxMessage->ReadOnly = true;
+		buttonUserDisconnect->Enabled = false;
 		textBoxMessage->BackColor = System::Drawing::SystemColors::Control;
 		domainUpDownIPs->BackColor = System::Drawing::SystemColors::Window;
 		button_on_off_server->Text = "Start Server";
 		isStarted = false;
 	}
-}
-
-//commands must begin with the symbol '&'
-void ServerWindow::sendSystemCommand(Socket^ connection, String^ command) {
-	if (command->Length == 0 || command[0] != '&')
-		return;
-	array<unsigned char>^ data;
-	data = Encoding::Unicode->GetBytes(command);
-	try {
-		connection->Send(data);
-	}
-	catch (...) {}
 }
 
 Image^ resizeImage(Image^ image, int width, int height) {
@@ -118,6 +108,40 @@ Image^ resizeImageWithRatioSave(Image^ image, int maxWidth, int maxHeight) {
 		image = resizeImage(image, width, height);
 	}
 	return image;
+}
+
+void ServerWindow::sendTextMessage(Socket^ handler, String^ message) {
+	try {
+		NetworkStream^ netStream = gcnew NetworkStream(handler);
+		BinaryWriter^ writer = gcnew BinaryWriter(netStream);
+		writer->Write(message);
+
+		writer->Flush();
+		writer->Close();
+		netStream->Close();
+	}
+	catch (...) {
+		//todo log
+	}
+}
+
+void ServerWindow::sendImageMessage(Socket^ handler, String^ imagePath) {
+	try {
+		BinaryFormatter^ formatter = gcnew BinaryFormatter();
+		NetworkStream^ netStream = gcnew NetworkStream(handler);
+		formatter->Serialize(netStream, Image::FromFile(imagePath));
+	}
+	catch (...) {
+		//todo log
+	}
+}
+
+void ServerWindow::addItemToCheckBox(String^ item) {
+	checkedListBoxUsers->Items->Add(item);
+}
+
+void ServerWindow::removeItemFromCheckBox(String^ item) {
+	checkedListBoxUsers->Items->Remove(item);
 }
 
 /*-----*/
@@ -189,42 +213,32 @@ void ServerWindow::startMessageTransfering(Object^ handler) {
 	Socket^ localHandler = (Socket^)handler;
 	MessageDelegate^ msg = gcnew MessageDelegate(this, &ServerWindow::serverMessage);
 	ImageMessageDelegate^ imageMsg = gcnew ImageMessageDelegate(this, &ServerWindow::InsertChatImage);
-	String^ clientIP = stripPortIP(localHandler->RemoteEndPoint->ToString());
+	String^ clientIP = addUser(localHandler);
 	int startMessage = chatPool->Count;
-	addUserName(localHandler);
+
 	while (true) {
-		try {
-			String^ messageContent = getStringMessage(localHandler);
+		String^ messageContent = getStringMessage(localHandler);
 
-			if (messageContent->Contains("&disconnect")) break;
-			if (messageContent->Contains("&get_message=")) {
-				int messageNum = Convert::ToInt32(messageContent->Replace("&get_message=", ""));
-				messageNum += startMessage;
-				sendChatMessage(localHandler, messageNum);
-				continue;
-			}
-			if (messageContent->Contains("&get_num_of_messages")) {
-				sendMessagesNum(localHandler, chatPool->Count - startMessage);
-				continue;
-			}
-			if (messageContent->Contains("&image")) {
-				Image^ image = getImageMessage(localHandler);
-				saveImage(image);
-				this->BeginInvoke(imageMsg, (String^)userDB[clientIP], imagePathes->Count - 1);
-				continue;
-			}
-
-			//this will only be called if none of ifs above worked
-			this->BeginInvoke(msg, userDB[clientIP], messageContent);
-		} 
-		catch (SocketException^ ex) {
-			if (ex->ErrorCode != 10054 && ex->ErrorCode != 10053) {
-				MessageBox::Show("Error code: " + ex->ErrorCode + ". " + ex->Message, "Ошибка",
-					MessageBoxButtons::OK, MessageBoxIcon::Error);
-			}
-			break;
+		if (messageContent->Contains("&disconnect")) break;
+		if (messageContent->Contains("&get_message=")) {
+			int messageNum = Convert::ToInt32(messageContent->Replace("&get_message=", ""));
+			messageNum += startMessage;
+			sendChatMessage(localHandler, messageNum);
+			continue;
 		}
-		//while end//
+		if (messageContent->Contains("&get_num_of_messages")) {
+			sendMessagesNum(localHandler, chatPool->Count - startMessage);
+			continue;
+		}
+		if (messageContent->Contains("&image")) {
+			Image^ image = getImageMessage(localHandler);
+			saveImage(image);
+			this->BeginInvoke(imageMsg, (String^)userDB[clientIP], imagePathes->Count - 1);
+			continue;
+		}
+
+		//this will only be called if none of ifs above worked
+		this->BeginInvoke(msg, userDB[clientIP], messageContent);
 	}
 	try {
 		localHandler->Shutdown(SocketShutdown::Both);
@@ -232,65 +246,70 @@ void ServerWindow::startMessageTransfering(Object^ handler) {
 	}
 	catch (...) {}
 	this->BeginInvoke(msg, "SYSTEM", userDB[clientIP] + " left the chat.");
-	userDB->Remove(clientIP);
+	removeUser(clientIP);
+	connected->Remove(localHandler);
 }
 
 String^ ServerWindow::getStringMessage(Socket^ handler) {
-	array<unsigned char>^ receiveData = gcnew array<unsigned char>(256); // буфер для ответа
-	StringBuilder^ builder = gcnew StringBuilder();
-	int bytes = 0; // количество полученных байт
+	try {
+		NetworkStream^ netStream = gcnew NetworkStream(handler);
 
-	do { //получаем ответ
-		bytes = handler->Receive(receiveData);
-		builder->Append(Encoding::Unicode->GetString(receiveData, 0, bytes));
-	} while (handler->Available > 0);
+		BinaryReader^ reader = gcnew BinaryReader(netStream);
+		String^ message = reader->ReadString();
 
-	return builder->ToString();
+		reader->Close();
+		netStream->Close();
+		return message;
+	}
+	catch (...) {
+		return "&disconnect";
+	}
 }
 
 Image^ ServerWindow::getImageMessage(Socket^ handler) {
-	array<unsigned char>^ imageData = gcnew array<unsigned char>(0);
-	array<unsigned char>^ receiveData = gcnew array<unsigned char>(256); // буфер для ответа
-	int bytes = 0; // количество полученных байт
 	try {
-		do { //получаем ответ
-			bytes = handler->Receive(receiveData);
-			Array::Resize(imageData, imageData->Length + bytes);
-			Array::Copy(receiveData, 0, imageData, imageData->Length - bytes, bytes);
-		} while (handler->Available > 0);
+		NetworkStream^ netStream = gcnew NetworkStream(handler);
+		BinaryFormatter^ formatter = gcnew BinaryFormatter();
 
-		ImageConverter^ convertData = gcnew ImageConverter();
-		Image^ image = (Image^)convertData->ConvertFrom(imageData);
+		Image^ image = (Image^)formatter->Deserialize(netStream);
+
 		int maxWidth = richTextBoxChat->Width * 9 / 10,
 			maxHeight = richTextBoxChat->Height * 9 / 10;
 		image = resizeImageWithRatioSave(image, maxWidth, maxHeight);
+		saveImage(image);
 
 		return image;
 	}
 	catch (...) {
-		this->BeginInvoke(gcnew MessageDelegate(this, &ServerWindow::serverMessage), "\r\nImage getting error");
 		return gcnew Bitmap(1, 1);
 	}
 }
 
-void ServerWindow::addUserName(Socket^ handler) {
-	String^ clientIP;
-	String^ messageContent;
-	try {
-		clientIP = stripPortIP(handler->RemoteEndPoint->ToString());
-		messageContent = getStringMessage(handler);
-	}
-	catch (...) {
-		messageContent = "unknown";
-	}
+//returns IP of new user, should be called right after connection
+String^ ServerWindow::addUser(Socket^ handler) {
+	String^ clientIP = stripPortIP(handler->RemoteEndPoint->ToString());
+	String^ messageContent = getStringMessage(handler);
+	
 
-	if (userDB->ContainsValue(messageContent)) {
+	while (userDB->ContainsValue(messageContent)) {
 		messageContent += "1";
 	}
 	userDB[clientIP] = messageContent;
 
+	CheckBoxDelegate^ addUser = gcnew CheckBoxDelegate(this, &ServerWindow::addItemToCheckBox);
+	this->BeginInvoke(addUser, userDB[clientIP]);
+
 	MessageDelegate^ msg = gcnew MessageDelegate(this, &ServerWindow::serverMessage);
 	this->BeginInvoke(msg, "SYSTEM", userDB[clientIP] + " joined the chat.");
+
+	return clientIP;
+}
+
+void ServerWindow::removeUser(String^ ip) {
+	CheckBoxDelegate^ removeUser = gcnew CheckBoxDelegate(this, &ServerWindow::removeItemFromCheckBox);
+	this->BeginInvoke(removeUser, userDB[ip]->ToString());
+
+	userDB->Remove(ip);
 }
 
 void ServerWindow::sendChatMessage(Socket^ handler, int messageNum) {
@@ -298,24 +317,27 @@ void ServerWindow::sendChatMessage(Socket^ handler, int messageNum) {
 		String^ message = chatPool[messageNum];
 		if (message->StartsWith("&image=")) {
 			int imageNum = Convert::ToInt32(message->Replace("&image=", ""));
-			array<unsigned char>^ imageDeclaring = Encoding::Unicode->GetBytes("&image");
-			handler->Send(imageDeclaring);
-			handler->SendFile(imagePathes[imageNum]);
+			sendTextMessage(handler, "&image");
+			sendImageMessage(handler, imagePathes[imageNum]);
 		}
 		else {
-			array<unsigned char>^ data = Encoding::Unicode->GetBytes(chatPool[messageNum]);
-			handler->Send(data);
+			sendTextMessage(handler, message);
 		}
 	}
-	catch (...) {
+	catch (SocketException^ ex) {
 		// TODO: error log on a server window
 	}
 }
 
 void ServerWindow::sendMessagesNum(Socket^ handler, int numOfMessages) {
 	try {
-		array<unsigned char>^ data = Encoding::Unicode->GetBytes(numOfMessages.ToString());
-		handler->Send(data);
+		NetworkStream^ netStream = gcnew NetworkStream(handler);
+		BinaryWriter^ writer = gcnew BinaryWriter(netStream);
+		writer->Write(numOfMessages.ToString());
+
+		writer->Flush();
+		writer->Close();
+		netStream->Close();
 	}
 	catch (...) {
 		// log
@@ -387,4 +409,17 @@ void ServerWindow::InsertChatImage(String^ user, int imageNum) {
 	Clipboard::SetDataObject(oldClipData);
 
 	chatPool->Add(Convert::ToString("&image=" + imageNum));
+}
+
+/*-----*/
+
+void ServerWindow::buttonUserDisconnect_Click(System::Object^  sender, System::EventArgs^  e) {
+	while (checkedListBoxUsers->SelectedIndices->Count > 0) {
+		String^ selectedItem = checkedListBoxUsers->SelectedItems[0]->ToString();
+		int selectedIndex = checkedListBoxUsers->SelectedIndices[0];
+
+		removeItemFromCheckBox(selectedItem);
+		connected[selectedIndex]->Close();
+		connected->RemoveAt(selectedIndex);
+	}
 }
