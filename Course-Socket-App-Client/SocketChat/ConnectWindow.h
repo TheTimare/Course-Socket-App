@@ -143,7 +143,7 @@ namespace SocketChatClient {
 	private:
 		ClientWindow^ mainWindow;
 
-	private: System::Void buttonConnect_Click(System::Object^  sender, System::EventArgs^  e);
+	private: void buttonConnect_Click(System::Object^  sender, System::EventArgs^  e);
 
 };
 }

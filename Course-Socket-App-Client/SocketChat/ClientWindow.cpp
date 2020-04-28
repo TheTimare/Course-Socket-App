@@ -122,7 +122,7 @@ void ClientWindow::setChatWorking(bool toStart) {
 /*---*/
 
 void ClientWindow::buttonSendMsg_Click(System::Object^  sender, System::EventArgs^  e) {
-	if (textBoxMessage->Equals("")) {
+	if (textBoxMessage->Text->Equals("")) {
 		return;
 	}
 	Task^ message = gcnew Task(gcnew Action(this, &ClientWindow::sendMessageFromChat));

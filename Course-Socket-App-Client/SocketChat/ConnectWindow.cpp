@@ -17,8 +17,11 @@ ConnectWindow::~ConnectWindow() {
 
 /*---*/
 
-System::Void ConnectWindow::buttonConnect_Click(System::Object^  sender, System::EventArgs^  e) {
+void ConnectWindow::buttonConnect_Click(System::Object^  sender, System::EventArgs^  e) {
 	try {
+		if (textBoxName->Text == "" || textBoxIP->Text == "" || textBoxPort->Text == "") {
+			throw gcnew Exception();
+		}
 		mainWindow->setPort(Convert::ToInt32(textBoxPort->Text));
 		if (mainWindow->getPort() < 1024 || mainWindow->getPort() > 49151)
 			throw gcnew Exception();
