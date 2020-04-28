@@ -16,6 +16,7 @@ namespace SocketChatClient {
 	using namespace System::Threading::Tasks;
 	using namespace System::Text;
 	using namespace System::IO;
+	using namespace System::Runtime::Serialization::Formatters::Binary;
 #pragma endregion
 
 #pragma region CONSTANT DEFINES
@@ -30,13 +31,7 @@ namespace SocketChatClient {
 	public:
 		ClientWindow(void);
 	protected:
-		~ClientWindow()
-		{
-			if (components)
-			{
-				delete components;
-			}
-		}
+		~ClientWindow();
 
 #pragma region Generated Fields
 	protected:
@@ -265,9 +260,10 @@ namespace SocketChatClient {
 
 	private: delegate void MessageDelegate(String^ message);
 			 delegate void EventDelegate(Object^ sender, EventArgs^ e);
-			 delegate void imageDelegate(Image^ image);
+			 delegate void ImagePathDelegate(String^ imagePath);
 
-	private: void sendMessage(); 
+	private: void sendMessageFromChat(); 
+			 void sendTextMessage(String^ message);
 			 void sendImageMessage(int imageNum);
 			 void setMessage(String^ message); 
 
@@ -276,7 +272,7 @@ namespace SocketChatClient {
 			 String^ getStringMessage();
 			 void addChatMessage(String^ message);
 			 Image^ getImageMessage();
-			 void insertChatImage(Image^ image);
+			 void insertChatImage(String^ imagePath);
 
 	private: void buttonUploadImg_Click(System::Object^  sender, System::EventArgs^  e);
 			 void toolStripAttachUpload_Click(System::Object^  sender, System::EventArgs^  e);
