@@ -71,8 +71,6 @@ void ClientWindow::connectToTheServer() {
 		// подключаемся к удаленному хосту
 		messageSocket->Connect(ipPoint);
 
-		/*array<unsigned char>^ nameData = Encoding::Unicode->GetBytes(name);
-		messageSocket->Send(nameData);*/
 		sendSystemMessage(name);
 
 		//начинаем слушать хоста
@@ -98,7 +96,7 @@ void ClientWindow::itemDisconnect_Click(System::Object^  sender, System::EventAr
 	addChatMessage("\r\nYou have been disconnected...");
 }
 
-void ClientWindow::setChatWorking(bool toStart) {
+void ClientWindow::setChatCondition(bool toStart) {
 	if (toStart){
 		itemDisconnect->Available = true;
 		itemConnect->Available = false;

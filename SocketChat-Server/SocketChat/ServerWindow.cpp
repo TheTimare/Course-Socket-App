@@ -56,8 +56,8 @@ String^ stripPortIP(String^ endPoint) {
 	return endPoint;
 }
 
-void ServerWindow::setSocket(Socket^ mainSocket) {
-	this->mainSocket = mainSocket;
+void ServerWindow::setSocket(Socket^ acceptSocket) {
+	this->acceptSocket = acceptSocket;
 }
 
 void ServerWindow::setChatWorking(bool toStart) {
@@ -156,7 +156,7 @@ void ServerWindow::button_on_off_server_Click(System::Object^  sender, System::E
 	}
 	else {
 		setChatWorking(false);
-		mainSocket->Close();
+		acceptSocket->Close();
 		while (connected->Count > 0) {
 			//sendSystemCommand(connected[i], "&server_off");
 			connected[0]->Close();

@@ -210,11 +210,12 @@ namespace SocketChatClient {
 #pragma endregion
 
 	private:
-		int port;
-		IPAddress^ ip;
-		String^ name;
-		bool inputSuccess;
+		int port; // server port
+		IPAddress^ ip; // server ip
+		String^ name; // user name, that will be send to server
+		bool inputSuccess; // indicate if user enter all data and don't close the window
 	public:
+		// setters-getters for ConnectWindow. it's set parent vars to chosen ip, port and username
 #pragma region setter-getters
 		int getPort() {
 			return port;
@@ -244,38 +245,34 @@ namespace SocketChatClient {
 #pragma endregion
 
 	private:
-		Socket^ messageSocket;
-		bool connectSuccess;
-		List<String^>^ imagePathes;
+		Socket^ messageSocket; //socket that will connect to server to send and receive messages
+		bool connectSuccess; // indicate if socket connected to the server
+		List<String^>^ imagePathes; // store uploaded images pathes
 		
-	private: void itemConnect_Click(System::Object^  sender, System::EventArgs^  e);
+	private: void itemConnect_Click(System::Object^  sender, System::EventArgs^  e); // call of ConnectWindow
+			 void connectToTheServer(); // try to connect the server with entered data
+			 void itemDisconnect_Click(System::Object^  sender, System::EventArgs^  e); // disconnect from the server
+			 void setChatCondition(bool toStart); // set chat button and fields condition to on/off
 
-	private: void ClientWindow::connectToTheServer();
-
-	private: void itemDisconnect_Click(System::Object^  sender, System::EventArgs^  e);
-
-	private: void setChatWorking(bool toStart);
+	private: delegate void MessageDelegate(String^ message); // access to messages from out process
+			 delegate void EventDelegate(Object^ sender, EventArgs^ e); // access to events from out process
+			 delegate void ImagePathDelegate(String^ imagePath); // access to images from out process
 
 	private: void buttonSendMsg_Click(System::Object^  sender, System::EventArgs^  e);
-
-	private: delegate void MessageDelegate(String^ message);
-			 delegate void EventDelegate(Object^ sender, EventArgs^ e);
-			 delegate void ImagePathDelegate(String^ imagePath);
-
-	private: void sendMessageFromChat(); 
-			 void sendTextMessage(String^ message);
+			 void sendMessageFromChat();  // sends entered message to server
+			 void sendTextMessage(String^ message); // send text message
 			 void sendImageMessage(int imageNum);
-			 void setMessage(String^ message); 
+			 void setMessage(String^ message);  // set messageTextBox data (neccessary to out process)
 
-	private: void startMessageTransfering();
-			 void sendSystemMessage(String^ message);
-			 String^ getStringMessage();
-			 void addChatMessage(String^ message);
-			 Image^ getImageMessage();
-			 void insertChatImage(String^ imagePath);
+	private: void startMessageTransfering(); // main function of app, manage message sending and recieving
+			 void sendSystemMessage(String^ message); // sends any message, but it's better to be command like "&..."
+			 String^ getStringMessage(); // get message from server
+			 void addChatMessage(String^ message); // add any message to chatTextBox
+			 Image^ getImageMessage(); 
+			 void insertChatImage(String^ imagePath); // inserting image to chatTextBox
 
-	private: void buttonUploadImg_Click(System::Object^  sender, System::EventArgs^  e);
-			 void toolStripAttachUpload_Click(System::Object^  sender, System::EventArgs^  e);
-			 void saveImage(Image^ image);
+	private: void buttonUploadImg_Click(System::Object^  sender, System::EventArgs^  e); // open tool strip with file types
+			 void toolStripAttachUpload_Click(System::Object^  sender, System::EventArgs^  e); // open image choose window
+			 void saveImage(Image^ image); // saves image to disk
 };
 }
