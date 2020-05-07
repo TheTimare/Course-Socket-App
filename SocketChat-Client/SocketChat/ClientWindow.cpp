@@ -4,17 +4,16 @@
 using namespace SocketChatClient;
 
 ClientWindow::ClientWindow() {
-	InitializeComponent();
-	AutoScaleDimensions = System::Drawing::SizeF(96, 96);
+	InitializeComponent(); // initialize windows forms components
 
 	imagePathes = gcnew List<String^>;
-	setChatWorking(false);
+	setChatCondition(false); // set chat to off state
 	addChatMessage("Hi there. To connect to the server, open the \"server\" tab above and click \"Connect\".");
 }
 
 ClientWindow::~ClientWindow() {
-	if (connectSuccess) {
-		itemDisconnect_Click(gcnew Object, gcnew EventArgs);
+	if (connectSuccess) { // if client still connected
+		itemDisconnect_Click(gcnew Object, gcnew EventArgs); // disconnect user
 	}
 	if (components) {
 		delete components;
@@ -51,29 +50,30 @@ Image^ resizeImageWithRatioSave(Image^ image, int maxWidth, int maxHeight) {
 /*---*/
 
 void ClientWindow::itemConnect_Click(System::Object^  sender, System::EventArgs^  e) {
-	inputSuccess = false;
+	inputSuccess = false; // initialize indicator
 	ConnectWindow^ connect = gcnew ConnectWindow(this);
-	connect->ShowDialog();
-	if (!inputSuccess) return;
+	connect->ShowDialog(); // show connection data form
+	if (!inputSuccess) { // if user leave without input
+		return;
+	}
 
 	connectToTheServer();
 
 	if (connectSuccess) {
-		setChatWorking(true);
+		setChatCondition(true);
 		addChatMessage("\r\nYou are connected to the server!");
 	}
 }
 
 void ClientWindow::connectToTheServer() {
 	try {
-		IPEndPoint^ ipPoint = gcnew IPEndPoint(ip, port);
+		IPEndPoint^ ipPoint = gcnew IPEndPoint(ip, port); // create end point from ip and port
 		messageSocket = gcnew Socket(AddressFamily::InterNetwork, SocketType::Stream, ProtocolType::Tcp);
-		// подключаемся к удаленному хосту
+		// try connect to the server
 		messageSocket->Connect(ipPoint);
 
-		sendSystemMessage(name);
+		sendSystemMessage(name); // send user name to server
 
-		//начинаем слушать хоста
 		Task^ messageTransfering = gcnew Task(gcnew Action(this, &ClientWindow::startMessageTransfering));
 		messageTransfering->Start();
 
@@ -90,7 +90,7 @@ void ClientWindow::itemDisconnect_Click(System::Object^  sender, System::EventAr
 		return;
 	}
 	connectSuccess = false;
-	setChatWorking(false);
+	setChatCondition(false);
 	sendTextMessage("&disconnect");
 	messageSocket->Close();
 	addChatMessage("\r\nYou have been disconnected...");
@@ -120,7 +120,7 @@ void ClientWindow::setChatCondition(bool toStart) {
 /*---*/
 
 void ClientWindow::buttonSendMsg_Click(System::Object^  sender, System::EventArgs^  e) {
-	if (textBoxMessage->Text->Equals("")) {
+	if (textBoxMessage->Text->Equals("")) { // if message is empty
 		return;
 	}
 	Task^ message = gcnew Task(gcnew Action(this, &ClientWindow::sendMessageFromChat));
@@ -130,7 +130,7 @@ void ClientWindow::buttonSendMsg_Click(System::Object^  sender, System::EventArg
 void ClientWindow::sendMessageFromChat() {
 	String^ message = textBoxMessage->Text;
 	message = message->Trim();
-	message = message->Replace("&", "");
+	message = message->Replace("&", ""); // remove system symbols
 	this->BeginInvoke(gcnew MessageDelegate(this, &ClientWindow::setMessage), "");
 
 	sendTextMessage(message);
@@ -139,12 +139,10 @@ void ClientWindow::sendMessageFromChat() {
 void ClientWindow::sendTextMessage(String^ message) {
 	try {
 		NetworkStream^ netStream = gcnew NetworkStream(messageSocket);
-
-		// отправляем сообщение
 		BinaryWriter^ writer = gcnew BinaryWriter(netStream);
-		writer->Write(message);
-		writer->Flush();
+		writer->Write(message); // send message
 
+		writer->Flush(); // close all streams
 		writer->Close();
 		netStream->Close();
 	}
@@ -155,9 +153,10 @@ void ClientWindow::sendTextMessage(String^ message) {
 
 void ClientWindow::sendImageMessage(int imageNum) {
 	try {
-		sendTextMessage("&image");
+		sendTextMessage("&image"); // send message that next message is image
 		BinaryFormatter^ formatter = gcnew BinaryFormatter();
 		NetworkStream^ netStream = gcnew NetworkStream(messageSocket);
+		// serializing image 
 		formatter->Serialize(netStream, Image::FromFile(imagePathes[imageNum]));
 	}
 	catch (...) {
@@ -174,33 +173,37 @@ void ClientWindow::setMessage(String^ message) {
 void ClientWindow::startMessageTransfering() {
 	MessageDelegate^ msg = gcnew MessageDelegate(this, &ClientWindow::addChatMessage);
 	ImagePathDelegate^ imageMsg = gcnew ImagePathDelegate(this, &ClientWindow::insertChatImage);
-	int currentMessage = 0;
-	while (true) {
-		System::Threading::Thread::Sleep(250);
-		sendSystemMessage("&get_num_of_messages");
+	int currentMessage = 0; // indicate how many message already downloaded
+	while (true) { 
+		System::Threading::Thread::Sleep(250); // wait for message asking
+		sendSystemMessage("&get_num_of_messages"); // request for messages num
 
-		String^ toConvert = getStringMessage();
-		if (toConvert->Contains("&disconnect")) {
+		String^ toConvert = getStringMessage(); // get asked messages num
+		if (toConvert->Contains("&disconnect")) { // if server don't response
 			this->BeginInvoke(gcnew EventDelegate(this, &ClientWindow::itemDisconnect_Click), gcnew Object, gcnew EventArgs);
 			break;
 		}
 		int numOfMessages = Convert::ToInt32(toConvert);
-		if (numOfMessages == currentMessage) continue;
+		if (numOfMessages == currentMessage) {
+			continue; // wait for new messages
+		}
 			
-		while (currentMessage != numOfMessages) {
+		while (currentMessage != numOfMessages) { // update messages pool
+			// send request for message
 			sendSystemMessage("&get_message=" + currentMessage++);
 
 			String^ messageContent = getStringMessage();
-			if (messageContent->Contains("&image")) {
+			if (messageContent->Contains("&image")) { // if next message is img
 				Image^ image = getImageMessage();
-				saveImage(image);
+				saveImage(image); // save image to disk
 				String^ path = imagePathes[imagePathes->Count - 1];
 				this->BeginInvoke(imageMsg, path);
-				continue;
+				continue; // do not add "&image" to the chat
 			}
 			if (messageContent->Contains("&disconnect")) {
 				break;
 			}
+
 			this->BeginInvoke(msg, messageContent);
 		}
 	}
@@ -210,9 +213,9 @@ void ClientWindow::sendSystemMessage(String^ message) {
 	try {
 		NetworkStream^ netStream = gcnew NetworkStream(messageSocket);
 		BinaryWriter^ writer = gcnew BinaryWriter(netStream);
-		writer->Write(message);
+		writer->Write(message); // send messages
 
-		writer->Flush();
+		writer->Flush(); // close all streams
 		writer->Close();
 		netStream->Close();
 	}
@@ -223,14 +226,14 @@ String^ ClientWindow::getStringMessage() {
 	try {
 		NetworkStream^ netStream = gcnew NetworkStream(messageSocket);
 		BinaryReader^ reader = gcnew BinaryReader(netStream);
-		String^ message = reader->ReadString();
+		String^ message = reader->ReadString(); // download messages
 
-		reader->Close();
+		reader->Close(); // close all streams
 		netStream->Close();
 		return message;
 	}
 	catch (...) {
-		if (connectSuccess) {
+		if (connectSuccess) { // if user still connected
 			MessageBox::Show("An error occurred - Connection lost", "Error",
 				MessageBoxButtons::OK, MessageBoxIcon::Error);
 		}
@@ -248,12 +251,13 @@ Image^ ClientWindow::getImageMessage() {
 		NetworkStream^ netStream = gcnew NetworkStream(messageSocket);
 		BinaryFormatter^ formatter = gcnew BinaryFormatter();
 
+		// deserialize image from stream
 		Image^ image = (Image^)formatter->Deserialize(netStream);
 
 		int maxWidth = richTextBoxChat->Width * 9 / 10,
 			maxHeight = richTextBoxChat->Height * 9 / 10;
 		image = resizeImageWithRatioSave(image, maxWidth, maxHeight);
-		saveImage(image);
+		saveImage(image); // save image to disk
 
 		return image;
 	}
@@ -264,18 +268,19 @@ Image^ ClientWindow::getImageMessage() {
 
 void ClientWindow::insertChatImage(String^ imagePath) {
 	DataFormats::Format^ imageFormat = DataFormats::GetFormat(DataFormats::Bitmap);
-	Object^ oldClipData = Clipboard::GetDataObject();
+	String^ oldClipData = Clipboard::GetText();
 	Clipboard::SetImage(Image::FromFile(imagePath));
 	richTextBoxChat->ReadOnly = false;
 	richTextBoxChat->Focus();
 	richTextBoxChat->Paste(imageFormat);
 	richTextBoxChat->ReadOnly = true;
-	Clipboard::SetDataObject(oldClipData);
+	Clipboard::SetText(oldClipData);
 }
 
 /*---*/
 
 void ClientWindow::buttonUploadImg_Click(System::Object^  sender, System::EventArgs^  e) {
+	// open tool strip menu
 	buttonUploadImg->ContextMenuStrip->Show(Cursor->Position);
 }
 
@@ -288,14 +293,16 @@ void ClientWindow::toolStripAttachUpload_Click(System::Object^  sender, System::
 	String^ path = dialog->FileName; // get name of file
 	Image^ image = Image::FromFile(path);
 
+	// resize image if it too big
 	int maxWidth = richTextBoxChat->Width * 9 / 10,
 		maxHeight = richTextBoxChat->Height * 9 / 10;
 	image = resizeImageWithRatioSave(image, maxWidth, maxHeight);
-	saveImage(image);
-	sendImageMessage(imagePathes->Count - 1);
+	saveImage(image); // save image to upload directory
+	sendImageMessage(imagePathes->Count - 1); // send new image
 }
 
 void ClientWindow::saveImage(Image^ image) {
+	// forming image path to download directory
 	String^ imagePath = Application::StartupPath + "/downloads/img" + (imagePathes->Count + 1) + ".jpg";
 	(gcnew FileInfo(imagePath))->Directory->Create();
 	image->Save(imagePath, Imaging::ImageFormat::Jpeg);
