@@ -3,9 +3,10 @@ Course work. Client-Server chat working on .net 4.6.1 sockets.
 (Higher version of .net 4.7.2 badly supported in visual studio)
 
 ### Using:
-* Sockets
-* Multithreading(Tasks)
-* Windows Forms
+* Net::Sockets
+* Net::Threading
+* Net::Tasks
+* on Windows Forms
 
 Written on C++/CLI.
 
