@@ -156,8 +156,9 @@ void ClientWindow::sendImageMessage(int imageNum) {
 		sendTextMessage("&image"); // send message that next message is image
 		BinaryFormatter^ formatter = gcnew BinaryFormatter();
 		NetworkStream^ netStream = gcnew NetworkStream(messageSocket);
-		// serializing image 
 		formatter->Serialize(netStream, Image::FromFile(imagePathes[imageNum]));
+
+		netStream->Close();
 	}
 	catch (...) {
 		//log
@@ -272,7 +273,9 @@ void ClientWindow::insertChatImage(String^ imagePath) {
 	Clipboard::SetImage(Image::FromFile(imagePath));
 	richTextBoxChat->ReadOnly = false;
 	richTextBoxChat->Focus();
-	richTextBoxChat->Paste(imageFormat);
+	if (richTextBoxChat->CanPaste(imageFormat)) {
+		richTextBoxChat->Paste(imageFormat);
+	}
 	richTextBoxChat->ReadOnly = true;
 	Clipboard::SetText(oldClipData);
 }

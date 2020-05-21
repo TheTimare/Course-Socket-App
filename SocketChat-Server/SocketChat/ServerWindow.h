@@ -266,9 +266,15 @@ namespace SocketChatServer {
 			 bool isStarted; // indicator of server start
 			 Hashtable^ userDB; // store usernames ( ip - name )
 			 Socket^ acceptSocket; // socket to accepts connections 
+
+	private: delegate void SocketDelegate(Socket^ mainSocket); // neccessary for change data from another process
+			 delegate void MessageDelegate(String^ user, String^ msg); // neccessary to add message to chatPool from out process
+			 delegate void ImageMessageDelegate(String^ user, int imageNum); // send image from out proccess
+			 delegate void CheckBoxDelegate(String^ item); // work with user from out process
 			 
 	private: void button_on_off_server_Click(System::Object^  sender, System::EventArgs^  e);
 			 void serverStart(); // set server to work
+			 void setChatWorking(bool isWorking); // set all buttons and fields to on/off condition
 
 	private: void startMessageTransfering(Object^ handler); // main function of app, manage getting and sending messages
 			 String^ getStringMessage(Socket^ handler); // get message from socket
@@ -279,28 +285,22 @@ namespace SocketChatServer {
 	private: String^ addUser(Socket^ handler); // add user ip and name to userDB
 			 void removeUser(String^ ip); // remove user from userDB by his ip
 
-	private: delegate void SocketDelegate(Socket^ mainSocket); // neccessary for change data from another process
-			 void setSocket(Socket^ acceptSocket); // set new acceptSocket
-
-	private: void setChatWorking(bool isWorking); // set all buttons and fields to on/off condition
+	private: void setSocket(Socket^ acceptSocket); // set new acceptSocket from serverStart method
 
 	private: void domainUpDownIPs_SelectedItemChanged(System::Object^  sender, System::EventArgs^  e); // handler of item change
 
 	private: void buttonSendMsg_Click(System::Object^  sender, System::EventArgs^  e); // send message button
-			 delegate void MessageDelegate(String^ user, String^ msg); // neccessary to add message to chatPool from out process
 			 void serverMessage(String^ user, String^ msg); // add message to chatPool and textbox
 
 	private: void buttonUploadImg_Click(System::Object^  sender, System::EventArgs^  e); // button to call toolStrip
 			 void toolStripAttachUpload_Click(System::Object^  sender, System::EventArgs^  e);
 			 void saveImage(Image^ image); // save image to disk
-			 delegate void ImageMessageDelegate(String^ user, int imageNum); // send image from out proccess
 			 void InsertChatImage(String^ user, int imageNum); // adds image to chatPool and textbox
 
 	private: void sendTextMessage(Socket^ handler, String^ message); // sending text message to client
 			 void sendImageMessage(Socket^ handler, String^ imagePath);
 
 	private: void buttonUserDisconnect_Click(System::Object^  sender, System::EventArgs^  e); // button to remove client
-			 delegate void CheckBoxDelegate(String^ item); // work with user from out process
 			 void addItemToCheckBox(String^ item); // add user to list of connected
 			 void removeItemFromCheckBox(String^ item); // remove user from list of connected
 	};

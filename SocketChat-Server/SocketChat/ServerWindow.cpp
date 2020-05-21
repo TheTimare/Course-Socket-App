@@ -14,6 +14,7 @@ ServerWindow::ServerWindow(void) {
 	imagePathes = gcnew List<String^>();
 	isStarted = false; // server is off from start
 
+	domainUpDownIPs->Items->Add("Any IP"); // possibility to connect from any ip
 	//geting PC address
 	IPHostEntry^ host = Dns::GetHostEntry(Dns::GetHostName());
 	for (int i = 0; i < host->AddressList->Length; i++) {
@@ -42,18 +43,6 @@ ServerWindow::~ServerWindow() {
 /*-----*/
 
 // All utilities not included in Server class
-
-// strip port from ip string
-String^ stripPortIP(String^ endPoint) { 
-	array<String^>^ splitList = endPoint->Split(':');
-	if (splitList->Length > 2) {
-		endPoint = IPAddress::Parse(endPoint)->ToString();
-	}
-	else if (splitList->Length == 2) {
-		endPoint = splitList[0];
-	}
-	return endPoint;
-}
 
 // image size in pixels
 Image^ resizeImage(Image^ image, int width, int height) {
@@ -94,9 +83,7 @@ void ServerWindow::sendTextMessage(Socket^ handler, String^ message) {
 		writer->Close();
 		netStream->Close();
 	}
-	catch (...) {
-		//todo log
-	}
+	catch (...) {}
 }
 
 void ServerWindow::sendImageMessage(Socket^ handler, String^ imagePath) {
@@ -104,10 +91,10 @@ void ServerWindow::sendImageMessage(Socket^ handler, String^ imagePath) {
 		BinaryFormatter^ formatter = gcnew BinaryFormatter(); // prepare formatter to make binaries from image
 		NetworkStream^ netStream = gcnew NetworkStream(handler);
 		formatter->Serialize(netStream, Image::FromFile(imagePath)); // serializing of image
+
+		netStream->Close();
 	}
-	catch (...) {
-		//todo log
-	}
+	catch (...) {}
 }
 
 void ServerWindow::addItemToCheckBox(String^ item) {
@@ -143,14 +130,18 @@ void ServerWindow::serverStart() {
 	int port = 8080; // standard port
 	try {
 		port = Convert::ToInt32(textBoxPort->Text); // parse port from textbox
+		if (port < 1024 || port > 65535) {
+			throw gcnew Exception();
+		}
 	}
 	catch (...) {
-		MessageBox::Show("Неправильно введен порт", "Ошибка",
+		MessageBox::Show("Incorrect port entered. Will be used port 8080", "Error",
 			MessageBoxButtons::OK, MessageBoxIcon::Error);
-		return;
 	}
-	
-	IPAddress^ ip = (IPAddress^)domainUpDownIPs->Items[selectedIP]; // get chosen ip
+
+	Object^ item = domainUpDownIPs->Items[selectedIP]; 
+	IPAddress^ ip = (item->Equals("Any IP")) ? IPAddress::Any : (IPAddress^)item; // get chosen ip
+
 	IPEndPoint^ ipPoint = gcnew IPEndPoint(ip, port); // get address to start the server
 	Socket^ listenSocket = gcnew Socket(AddressFamily::InterNetwork, SocketType::Stream, ProtocolType::Tcp);
 	listenSocket->Bind(ipPoint); // bind socket to chosen ip
@@ -161,18 +152,11 @@ void ServerWindow::serverStart() {
 	while (isStarted) { // isStarted can be set out of function
 		try {
 			Socket^ handler = listenSocket->Accept(); // waiting for connection
-			handler->ReceiveTimeout = CLIENTS_RECEIVE_TIMEOUT; // set option from the config
-			String^ ip = stripPortIP(handler->RemoteEndPoint->ToString()); // get ip without port
-			if (userDB->ContainsKey(ip)) { // if this ip already connected 
-				handler->Close(); // than close this connection
-			}
-			else {
-				connected->Add(handler); // adding new socket to list of connected
-				Task^ messageTransfer = gcnew Task((Action<Object^>^)(
-					gcnew Action<Object^>(this, &ServerWindow::startMessageTransfering)), handler
-				);
-				messageTransfer->Start(); // start message transfering for connected socket
-			}
+			connected->Add(handler); // adding new socket to list of connected
+			Task^ messageTransfer = gcnew Task((Action<Object^>^)(
+				gcnew Action<Object^>(this, &ServerWindow::startMessageTransfering)), handler
+			);
+			messageTransfer->Start(); // start message transfering for connected socket
 		}
 		catch (SocketException^ ex) {
 			if (ex->ErrorCode != 10054 && ex->ErrorCode != 10004) {
@@ -313,9 +297,7 @@ void ServerWindow::sendChatMessage(Socket^ handler, int messageNum) {
 			sendTextMessage(handler, message); // send usual text message
 		}
 	}
-	catch (SocketException^ ex) {
-		// TODO: error log on a server window
-	}
+	catch (SocketException^ ex) {}
 }
 
 void ServerWindow::sendMessagesNum(Socket^ handler, int numOfMessages) {
@@ -328,9 +310,7 @@ void ServerWindow::sendMessagesNum(Socket^ handler, int numOfMessages) {
 		writer->Close();
 		netStream->Close();
 	}
-	catch (...) {
-		// log
-	}
+	catch (...) {}
 }
 
 /*-----*/
@@ -349,7 +329,7 @@ void ServerWindow::buttonUserDisconnect_Click(System::Object^  sender, System::E
 
 //returns IP of new user, should be called right after connection
 String^ ServerWindow::addUser(Socket^ handler) {
-	String^ clientIP = stripPortIP(handler->RemoteEndPoint->ToString());
+	String^ clientIP = handler->RemoteEndPoint->ToString();
 	String^ username = getStringMessage(handler); // get user name
 
 	while (userDB->ContainsValue(username)) { // if DB already have such name
@@ -441,7 +421,9 @@ void ServerWindow::InsertChatImage(String^ user, int imageNum) {
 	Clipboard::SetImage(Image::FromFile(imagePathes[imageNum]));
 	richTextBoxChat->ReadOnly = false;
 	richTextBoxChat->Focus(); // focus on the chat text box
-	richTextBoxChat->Paste(imageFormat); // paste image to text box
+	if (richTextBoxChat->CanPaste(imageFormat)) {
+		richTextBoxChat->Paste(imageFormat);
+	}
 	richTextBoxChat->ReadOnly = true;
 	Clipboard::SetText(oldClipData);
 
